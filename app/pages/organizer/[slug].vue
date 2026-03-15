@@ -47,8 +47,6 @@ if (error.value || !organizer.value) {
     fatal: true,
   })
 }
-
-console.log('Tours:', tours.value)
 </script>
 
 <template>
