@@ -5,11 +5,17 @@ export type Tour = {
   date: string | Date
   location: string
   image: string | null
-  creator?: string
+  creator?: string | TourCreatorSummary
   attendees: TourAttendee[]
   sponsors: TourSponsor[]
   packages: TourPackage[]
   departure_points: TourDeparturePoint[]
+}
+
+export type TourCreatorSummary = {
+  _id?: string
+  name?: string
+  slug?: string
 }
 
 export type TourSocial = {
@@ -61,10 +67,15 @@ export type TourFormInitialValues = Partial<TourFormState> & {
 }
 
 export type TourResponse = {
-  tour?: Tour
+  tour: Tour
+}
+
+export type TourListResponse = {
+  tours: Tour[]
 }
 
 export type ToursByOrganizerResponse = {
+  organizer: TourCreatorSummary
   tours: Tour[]
 }
 
