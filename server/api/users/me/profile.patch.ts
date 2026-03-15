@@ -1,4 +1,3 @@
-import { createError, getRequestHeader, readBody, readMultipartFormData } from 'h3'
 import { Profile } from '~~/server/models/Profile'
 import { ensureProfileForUser, getSessionWithProfile } from '~~/server/utils/auth'
 import {
@@ -6,17 +5,7 @@ import {
   MAX_PROFILE_UPLOAD_SOURCE_BYTES,
 } from '~~/server/utils/image'
 import { useHubBlob } from '~~/server/utils/r2'
-
-type ProfileUpdateBody = {
-  banner?: string | null
-  bio?: string
-  picture?: string | null
-  social?: {
-    instagram?: string
-    tiktok?: string
-    x?: string
-  }
-}
+import type { ProfileUpdateBody } from '~~/types/profile'
 
 function normalizeString(value: unknown, field: string) {
   if (typeof value !== 'string') {

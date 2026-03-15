@@ -1,4 +1,3 @@
-import { createError, getRouterParam } from 'h3'
 import '~~/server/models/Profile'
 import { User } from '~~/server/models/User'
 

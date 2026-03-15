@@ -1,4 +1,3 @@
-import { createError } from 'h3'
 import { getSessionWithProfile } from '~~/server/utils/auth'
 
 export default defineEventHandler(async (event) => {

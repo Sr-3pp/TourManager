@@ -1,5 +1,4 @@
 import mongoose from 'mongoose'
-import mongooseBcrypt from 'mongoose-bcrypt'
 
 const TourSchema = new mongoose.Schema(
   {
@@ -161,8 +160,6 @@ const TourSchema = new mongoose.Schema(
     },
   }
 )
-
-TourSchema.plugin(mongooseBcrypt)
 
 export const Tour =
   mongoose.models.Tour || mongoose.model('Tour', TourSchema)

@@ -1,10 +1,4 @@
-import type { OrganizerProfileFormState, Profile } from '~~/types/profile'
-
-type MeResponse = {
-    user?: {
-        profile?: Profile
-    }
-}
+import type { MeResponse, OrganizerProfileFormState, Profile } from '~~/types/profile'
 
 export const useProfile = () => {
     const profile = useState<Profile | undefined>('profile', () => undefined)
