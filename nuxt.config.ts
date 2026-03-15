@@ -8,7 +8,6 @@ export default defineNuxtConfig({
     r2AccessKeyId: process.env.R2_ACCESS_KEY_ID ?? process.env.NUXT_R2_ACCESS_KEY_ID ?? '',
     r2AccountId: process.env.R2_ACCOUNT_ID ?? process.env.NUXT_R2_ACCOUNT_ID ?? '',
     r2BucketName: process.env.R2_BUCKET_NAME ?? process.env.NUXT_R2_BUCKET_NAME ?? '',
-    r2PublicBaseUrl: process.env.R2_PUBLIC_BASE_URL ?? process.env.NUXT_R2_PUBLIC_BASE_URL ?? '',
     r2SecretAccessKey:
       process.env.R2_SECRET_ACCESS_KEY ?? process.env.NUXT_R2_SECRET_ACCESS_KEY ?? '',
     mongoUri: process.env.NUXT_MONGODB_URI || '',

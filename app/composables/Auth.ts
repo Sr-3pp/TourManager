@@ -1,5 +1,5 @@
 export const useAuth = () => {
-    const session = useState<{ user: { name: string; email: string }, session: {} } | null>('session', () => null)
+    const session = useState<{ user: { name: string; email: string, level: number }, session: {} } | null>('session', () => null)
 
     const registerUser = async (email: string, password: string, name: string) => {
         try {
@@ -43,7 +43,7 @@ export const useAuth = () => {
         
         try {
             const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
-            const data = await $fetch<{ user: { name: string; email: string }, session: {} }>('/api/auth/get-session', {
+            const data = await $fetch<{ user: { name: string; email: string, level: number }, session: {} }>('/api/auth/get-session', {
                 credentials: 'include',
                 headers,
             })

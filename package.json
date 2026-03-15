@@ -31,6 +31,7 @@
     "mongoose": "^9.3.0",
     "mongoose-bcrypt": "^1.11.0",
     "nuxt": "^4.4.2",
+    "sharp": "^0.34.5",
     "vue": "^3.5.30",
     "vue-router": "^5.0.3"
   },

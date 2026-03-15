@@ -16,21 +16,18 @@ const UserSchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
     },
-    // Optional for OAuth-only users; hashed automatically by mongoose-bcrypt.
-    password: {
-      type: String,
-      bcrypt: true,
-      select: false,
-    },
     emailVerified: {
       type: Boolean,
       required: true,
       default: false,
     },
-    level: {
-        type: Number,
-        required: true,
-        default: 1,
+    slug: {
+        type: String,
+        unique: true,
+        index: true,
+      sparse: true,
+        trim: true,
+        lowercase: true,
     }
   },
   {
@@ -40,7 +37,7 @@ const UserSchema = new mongoose.Schema(
     toJSON: {
       virtuals: true,
       transform: (_doc, ret) => {
-        const { _id, password, ...clean } = ret
+        const { _id, ...clean } = ret
         return clean
       },
     },

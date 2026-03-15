@@ -5,6 +5,7 @@ import { mongodbAdapter } from 'better-auth/adapters/mongodb'
 import mongoose from 'mongoose'
 import { Profile } from '~~/server/models/Profile'
 import { User } from '~~/server/models/User'
+import { ensureUserSlug } from '~~/server/utils/slug'
 import { dbConnect } from './db'
 
 let authInstance: ReturnType<typeof betterAuth> | null = null
@@ -47,10 +48,22 @@ export async function getAuth() {
       usePlural: true,
     }),
 
+    user: {
+      additionalFields: {
+        level: {
+          type: 'number',
+          required: false,
+          defaultValue: 1,
+          input: false,
+        },
+      },
+    },
+
     databaseHooks: {
       user: {
         create: {
           after: async (user) => {
+            await ensureUserSlug(user.id, user.name)
             await ensureProfileForUser(user.id)
           },
         },
@@ -89,6 +102,7 @@ export async function getSessionWithProfile(event: H3Event) {
     return null
   }
 
+  await ensureUserSlug(session.user.id, session.user.name)
   await ensureProfileForUser(session.user.id)
 
   const user = await User.findById(session.user.id).populate('profile')
