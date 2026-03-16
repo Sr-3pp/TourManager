@@ -6,6 +6,7 @@ export type Tour = {
   location: string
   image: string | null
   creator?: string | TourCreatorSummary
+  price: number
   attendees: TourAttendee[]
   sponsors: TourSponsor[]
   packages: TourPackage[]

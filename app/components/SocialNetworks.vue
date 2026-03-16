@@ -1,5 +1,5 @@
 <script setup lang="ts">
-defineProps<{
+const props = defineProps<{
     socialNetworks: {
         whatsapp?: string
         instagram?: string
@@ -26,15 +26,23 @@ const iconMap = {
         urlPrefix: 'https://www.tiktok.com/@',
     }
 }
+
+const visibleNetworks = computed(() =>
+    Object.entries(props.socialNetworks).filter(([, value]) => Boolean(value)),
+)
 </script>
 
 <template>
     <div>
-        <h2 class="text-xl font-bold mb-4">Social Networks</h2>
-        <ul class="flex gap-2">
-            <li v-for="(url, network) in socialNetworks" :key="network">
-                <NuxtLink :to="iconMap[network].urlPrefix + url" target="_blank">
-                    <UIcon :name="iconMap[network].icon" class="text-2xl" />
+        <ul class="flex flex-wrap gap-3">
+            <li v-for="[network, url] in visibleNetworks" :key="network">
+                <NuxtLink
+                    :to="iconMap[network].urlPrefix + url"
+                    target="_blank"
+                    class="inline-flex items-center gap-2 rounded-full border border-default bg-secondary/10 px-4 py-2 text-sm font-medium text-secondary transition hover:bg-secondary/15"
+                >
+                    <UIcon :name="iconMap[network].icon" class="text-base" />
+                    <span class="capitalize">{{ network }}</span>
                 </NuxtLink>
             </li>
         </ul>

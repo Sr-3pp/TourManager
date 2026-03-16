@@ -30,6 +30,10 @@ const TourSchema = new mongoose.Schema(
         ref: 'User',
         required: true,
     },
+    price: {
+        type: Number,
+        required: true,
+    },
      attendees: [{
         name: {
             type: String,

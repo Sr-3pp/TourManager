@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { OrganizerResponse, ProfileSocial } from '~~/types/profile'
+import type { OrganizerResponse } from '~~/types/profile'
 
 const {params} = useRoute()
 const slug = computed(() =>
@@ -12,9 +12,9 @@ const {getToursByOrganizer} = useTour();
 
 const { data, error, status } = await useAsyncData<OrganizerResponse>(
   () => `organizer-${slug.value}`,
-  async () => {
+  async (): Promise<OrganizerResponse> => {
     const [organizerData, tours] = await Promise.all([
-      $fetch(`/api/users/${encodeURIComponent(slug.value)}`).catch((err) => {
+      $fetch<{ user: OrganizerResponse['user'] }>(`/api/users/${encodeURIComponent(slug.value)}`).catch((err) => {
         if (err.statusCode === 404) {
           return null
         }
@@ -37,7 +37,8 @@ const { data, error, status } = await useAsyncData<OrganizerResponse>(
   { watch: [slug] },
 )
 
-const organizer = computed(() => data.value?.user)
+const organizer = computed<OrganizerResponse['user'] | null>(() => data.value?.user ?? null)
+const organizerProfile = computed(() => organizer.value?.profile ?? null)
 const tours = computed(() => data.value?.tours || [])
 
 if (error.value || !organizer.value) {
@@ -50,28 +51,5 @@ if (error.value || !organizer.value) {
 </script>
 
 <template>
-    <ProfileHeader :user="organizer" :profile="organizer.profile" />
-
-    <p class="text-muted">{{ organizer.profile?.bio }}</p>
-
-    <SocialNetworks :social-networks="(organizer.profile?.social as ProfileSocial)" />
-
-    <ul>
-        <li v-for="tour in tours" :key="tour._id">
-            <UCard>
-                <template #header>
-                    <h2 class="text-xl font-bold">{{ tour.name }}</h2>
-                </template>
-                <figure>
-                    <NuxtImg
-                        v-if="tour.image"
-                        :src="`/blob/${tour.image}`"
-                        alt="Tour Picture"
-                        class="w-full h-48 object-cover rounded"
-                    />
-                </figure>
-                <p>{{ tour.description }}</p>
-            </UCard>
-        </li>
-    </ul>
+    <ProfileShowcase :user="organizer" :profile="organizerProfile" :tours="tours" tours-title="Organizer tours" />
 </template>

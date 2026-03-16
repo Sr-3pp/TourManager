@@ -16,6 +16,7 @@ const user = computed(() => session.value?.user || null)
                     <li><NuxtLink to="/">Home</NuxtLink></li>
                     <li v-if="!user"><NuxtLink to="/auth/login">Login</NuxtLink></li>
                     <li v-if="user"><NuxtLink to="/panel/users">Users</NuxtLink></li>
+                    <li v-if="user"><NuxtLink to="/profile">Profile</NuxtLink></li>
                 </ul>
                 <span>
                     {{ user ? `Logged in as ${user.name}` : 'Not logged in' }}

@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import type { ProfileSocial } from '~~/types/profile'
-
 definePageMeta({
     middleware: ['auth'],
 })
@@ -8,30 +6,36 @@ definePageMeta({
 const { session } = useAuth()
 
 const { profile, loadProfile } = useProfile()
+const { getToursByOrganizer } = useTour()
 
 await loadProfile()
 
 const profileModal = ref(false)
 const tourModal = ref(false)
+
+const tours = await getToursByOrganizer(profile.value!.user || '').catch((err) => {
+    console.error('Error fetching tours for organizer:', err)
+    return []
+})
 </script>
 
 <template>
-    <div class="p-4">
-        <ProfileHeader :user="session?.user" :profile="profile" />
-        <UButton @click="profileModal = true" class="mb-4">Edit Profile</UButton>
-        <UButton @click="tourModal = true" class="mb-4">Create Tour</UButton>
-        <SocialNetworks :social-networks="(profile?.social as ProfileSocial)" />
+    <ProfileShowcase :user="session?.user || null" :profile="profile ?? null" :tours="tours || []" tours-title="Your tours">
+        <template #actions>
+            <UButton @click="profileModal = true">Edit Profile</UButton>
+            <UButton color="secondary" variant="soft" @click="tourModal = true">Create Tour</UButton>
+        </template>
+    </ProfileShowcase>
 
-        <UModal v-model:open="profileModal" title="Edit Profile">
-            <template #body>
-                <ProfileForm />
-            </template>
-        </UModal>
+    <UModal v-model:open="profileModal" title="Edit Profile">
+        <template #body>
+            <ProfileForm />
+        </template>
+    </UModal>
 
-        <UModal v-model:open="tourModal" title="Create Tour">
-            <template #body>
-                <TourForm @saved="tourModal = false" />
-            </template>
-        </UModal>
-    </div>
+    <UModal v-model:open="tourModal" title="Create Tour">
+        <template #body>
+            <TourForm @saved="tourModal = false" />
+        </template>
+    </UModal>
 </template>
