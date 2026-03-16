@@ -1,14 +1,13 @@
 <script setup lang="ts">
+type SocialNetworkKey = 'whatsapp' | 'instagram' | 'x' | 'tiktok'
+
+type SocialNetworks = Partial<Record<SocialNetworkKey, string>>
+
 const props = defineProps<{
-    socialNetworks: {
-        whatsapp?: string
-        instagram?: string
-        x?: string
-        tiktok?: string
-    }
+    socialNetworks: SocialNetworks
 }>()
 
-const iconMap = {
+const iconMap: Record<SocialNetworkKey, { icon: string; urlPrefix: string }> = {
     whatsapp: {
         icon: 'i-simple-icons-whatsapp',
          urlPrefix: 'https://wa.me/',
@@ -28,7 +27,7 @@ const iconMap = {
 }
 
 const visibleNetworks = computed(() =>
-    Object.entries(props.socialNetworks).filter(([, value]) => Boolean(value)),
+    Object.entries(props.socialNetworks).filter(([, value]) => Boolean(value)) as Array<[SocialNetworkKey, string]>,
 )
 </script>
 
