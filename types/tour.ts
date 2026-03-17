@@ -95,3 +95,11 @@ export type TourCreateBody = {
 }
 
 export type TourUpdateBody = TourCreateBody
+
+export type NormalizeStringOptions = {
+  required?: boolean
+}
+
+export type NestedFieldOptions = {
+  requiredFields?: boolean
+}

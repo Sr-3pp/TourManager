@@ -11,21 +11,7 @@ import {
   PutObjectCommand,
 } from '@aws-sdk/client-s3';
 import type { S3ClientConfig, PutObjectCommandInput } from '@aws-sdk/client-s3';
-
-type R2Config = {
-  endpoint?: string;
-  accessKey?: string;
-  secretKey?: string;
-  bucket?: string;
-};
-
-type RuntimeR2Config = {
-  r2?: R2Config;
-  r2AccountId?: string;
-  r2AccessKeyId?: string;
-  r2SecretAccessKey?: string;
-  r2BucketName?: string;
-};
+import type { FileEntry, PutBody, R2Config, RuntimeR2Config } from '~~/types/server';
 
 const runtime = useRuntimeConfig() as RuntimeR2Config;
 const nested = runtime.r2;
@@ -76,10 +62,6 @@ try {
 }
 
 export function useHubBlob() {
-  type FileEntry = { pathname: string; size?: number; lastModified?: Date };
-
-  type PutBody = Blob | Uint8Array | Buffer | ReadableStream | ArrayBuffer | string;
-
   const getContentType = (body: PutBody): string | undefined => {
     if (body && typeof body === 'object') {
       // Blob-like

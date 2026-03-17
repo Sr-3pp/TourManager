@@ -1,27 +1,25 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui'
+import type { AdminUser } from '~~/types/user'
 
 definePageMeta({
     middleware: ['admin'],
 })
 
-type PanelUser = {
-    _id: string
-    name: string
-    email: string
-    level?: number
-}
+const { getUsers, deleteUser } = useUser()
 
-const { getUsers } = useUser()
-
-const loadUsers = async (): Promise<PanelUser[]> => {
+const loadUsers = async (): Promise<AdminUser[]> => {
     return await getUsers()
 }
 
-const { data: users, error, status: usersStatus } = await useAsyncData<PanelUser[]>('users', () => loadUsers())
-const usersList = computed<PanelUser[]>(() => users.value ?? [])
+const { data: users, error, status: usersStatus, refresh } = await useAsyncData<AdminUser[]>('users', () => loadUsers())
+const usersList = computed<AdminUser[]>(() => users.value ?? [])
+const isEditModalOpen = ref(false)
+const deletingUserId = ref<string | null>(null)
+const selectedUser = ref<AdminUser | null>(null)
+const actionError = ref('')
 
-const columns: TableColumn<PanelUser>[] = [
+const columns: TableColumn<AdminUser>[] = [
     {
         accessorKey: 'name',
         header: 'Name',
@@ -35,7 +33,78 @@ const columns: TableColumn<PanelUser>[] = [
         header: 'Level',
         cell: ({ row }) => String(row.original.level ?? 1),
     },
+    {
+        id: 'actions',
+        header: 'Actions',
+    },
 ]
+
+function getUserId(user: AdminUser) {
+    return user.id || user._id || ''
+}
+
+function openEditModal(user: AdminUser) {
+    selectedUser.value = user
+    actionError.value = ''
+    isEditModalOpen.value = true
+}
+
+async function handleUserSaved() {
+    isEditModalOpen.value = false
+    selectedUser.value = null
+    await refresh()
+}
+
+watch(isEditModalOpen, (open) => {
+    if (!open) {
+        selectedUser.value = null
+    }
+})
+
+function getErrorMessage(error: unknown) {
+    if (typeof error === 'object' && error && 'data' in error) {
+        const data = (error as { data?: { statusMessage?: string; message?: string } }).data
+        if (data?.statusMessage) {
+            return data.statusMessage
+        }
+        if (data?.message) {
+            return data.message
+        }
+    }
+
+    if (typeof error === 'object' && error && 'statusMessage' in error) {
+        const statusMessage = (error as { statusMessage?: string }).statusMessage
+        if (statusMessage) {
+            return statusMessage
+        }
+    }
+
+    if (error instanceof Error && error.message) {
+        return error.message
+    }
+
+    return 'Failed to delete user.'
+}
+
+async function removeUser(user: AdminUser) {
+    const confirmed = window.confirm(`Delete ${user.name}? This action cannot be undone.`)
+
+    if (!confirmed) {
+        return
+    }
+
+    deletingUserId.value = getUserId(user)
+    actionError.value = ''
+
+    try {
+        await deleteUser(getUserId(user))
+        await refresh()
+    } catch (error) {
+        actionError.value = getErrorMessage(error)
+    } finally {
+        deletingUserId.value = null
+    }
+}
 </script>
 
 <template>
@@ -49,10 +118,48 @@ const columns: TableColumn<PanelUser>[] = [
             :loading="usersStatus === 'pending'"
             sticky
             class="rounded-xl border border-default"
-        />
+        >
+            <template #actions-cell="{ row }">
+                <div class="flex items-center justify-end gap-2">
+                    <UButton
+                        size="sm"
+                        variant="soft"
+                        icon="i-lucide-pencil"
+                        @click="openEditModal(row.original)"
+                    >
+                        Edit
+                    </UButton>
+                    <UButton
+                        size="sm"
+                        color="error"
+                        variant="soft"
+                        icon="i-lucide-trash"
+                        :loading="deletingUserId === getUserId(row.original)"
+                        @click="removeUser(row.original)"
+                    >
+                        Delete
+                    </UButton>
+                </div>
+            </template>
+        </UTable>
 
         <p v-if="error" class="mt-4 text-sm text-error">
             Failed to load users.
         </p>
+
+        <p v-if="actionError" class="mt-4 text-sm text-error">
+            {{ actionError }}
+        </p>
     </UContainer>
+
+    <UModal v-model:open="isEditModalOpen" title="Edit User">
+        <template #body>
+            <UserEditForm
+                v-if="selectedUser"
+                :user="selectedUser"
+                @saved="handleUserSaved"
+                @cancel="isEditModalOpen = false"
+            />
+        </template>
+    </UModal>
 </template>

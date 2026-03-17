@@ -26,9 +26,7 @@ const loginFields: AuthFormField[] = [
     },
 ]
 
-type LoginSchema = z.output<typeof loginSchema>
-
-async function onSubmit(event: FormSubmitEvent<LoginSchema>) {
+async function onSubmit(event: FormSubmitEvent<z.output<typeof loginSchema>>) {
     const { email, password } = event.data
 
     try {

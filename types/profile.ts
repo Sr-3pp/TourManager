@@ -10,6 +10,11 @@ export type OrganizerUser = {
 	profile?: Profile
 }
 
+export type ProfileUser = {
+	name?: string
+	slug?: string
+} | null
+
 export type Profile = {
 	banner: string | null
 	bio: string
@@ -42,3 +47,5 @@ export type ProfileUpdateBody = {
 	picture?: string | null
 	social?: Partial<ProfileSocial>
 }
+
+export type ProfileImageKind = 'picture' | 'banner'

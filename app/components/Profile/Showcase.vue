@@ -1,11 +1,6 @@
 <script setup lang="ts">
-import type { Profile } from '~~/types/profile'
+import type { Profile, ProfileUser } from '~~/types/profile'
 import type { Tour } from '~~/types/tour'
-
-type ProfileUser = {
-  name?: string
-  slug?: string
-} | null
 
 const props = defineProps<{
   user: ProfileUser

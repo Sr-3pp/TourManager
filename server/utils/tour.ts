@@ -5,6 +5,8 @@ import {
 } from '~~/server/utils/image'
 import { useHubBlob } from '~~/server/utils/r2'
 import type {
+  NestedFieldOptions,
+  NormalizeStringOptions,
   TourAttendee,
   TourCreateBody,
   TourDeparturePoint,
@@ -12,14 +14,6 @@ import type {
   TourSponsor,
   TourSocial,
 } from '~~/types/tour'
-
-type NormalizeStringOptions = {
-  required?: boolean
-}
-
-type NestedFieldOptions = {
-  requiredFields?: boolean
-}
 
 export function normalizeString(value: unknown, field: string, options?: NormalizeStringOptions) {
   const required = options?.required ?? false

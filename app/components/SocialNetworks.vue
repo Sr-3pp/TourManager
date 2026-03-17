@@ -1,7 +1,5 @@
 <script setup lang="ts">
-type SocialNetworkKey = 'whatsapp' | 'instagram' | 'x' | 'tiktok'
-
-type SocialNetworks = Partial<Record<SocialNetworkKey, string>>
+import type { SocialNetworkKey, SocialNetworks } from '~~/types/social'
 
 const props = defineProps<{
     socialNetworks: SocialNetworks

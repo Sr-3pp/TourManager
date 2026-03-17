@@ -45,9 +45,7 @@ const registerFields: AuthFormField[] = [
     },
 ]
 
-type RegisterSchema = z.output<typeof registerSchema>
-
-async function onSubmit(event: FormSubmitEvent<RegisterSchema>) {
+async function onSubmit(event: FormSubmitEvent<z.output<typeof registerSchema>>) {
     const { email, password, name } = event.data
 
     try {

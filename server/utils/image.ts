@@ -1,10 +1,9 @@
 import { createError } from 'h3'
 import sharp from 'sharp'
+import type { ProfileImageKind } from '~~/types/profile'
 
 export const MAX_PROFILE_UPLOAD_SOURCE_BYTES = 10 * 1024 * 1024
 export const MAX_PROFILE_UPLOAD_OUTPUT_BYTES = 1024 * 1024
-
-export type ProfileImageKind = 'picture' | 'banner'
 
 export async function compressProfileImageForUpload(
   input: Uint8Array,

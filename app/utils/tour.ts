@@ -1,7 +1,5 @@
 import type { Tour } from '~~/types/tour'
 
-type TourDateFormatOptions = Intl.DateTimeFormatOptions
-
 const DEFAULT_LOCALE = 'en-US'
 
 export function formatTourPrice(value: number | null | undefined, options?: Intl.NumberFormatOptions) {
@@ -18,7 +16,7 @@ export function formatTourPrice(value: number | null | undefined, options?: Intl
 export function formatTourDate(
   value: string | Date | null | undefined,
   fallback = 'Date to be announced',
-  options?: TourDateFormatOptions,
+  options?: Intl.DateTimeFormatOptions,
 ) {
   if (!value) {
     return fallback

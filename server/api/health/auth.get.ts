@@ -1,13 +1,8 @@
 import mongoose from 'mongoose'
 import { dbConnect } from '~~/server/utils/db'
+import type { CollectionHealth } from '~~/types/server'
 
 const AUTH_COLLECTIONS = ['users', 'sessions', 'accounts', 'verifications'] as const
-
-type CollectionHealth = {
-  collection: string
-  ok: boolean
-  error?: string
-}
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
