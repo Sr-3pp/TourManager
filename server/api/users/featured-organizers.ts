@@ -3,6 +3,7 @@ import '~~/server/models/User'
 import { Profile } from '~~/server/models/Profile'
 import { Tour } from '~~/server/models/Tour'
 import { dbConnect } from '~~/server/utils/db'
+import { ensureUserSlug } from '~~/server/utils/slug'
 import mongoose from 'mongoose'
 
 export default defineEventHandler(async () => {
@@ -39,12 +40,13 @@ export default defineEventHandler(async () => {
     counts.map(entry => [String(entry._id), Number(entry.total || 0)]),
   )
 
-  return {
-    organizers: featuredProfiles
+  const organizers = await Promise.all(
+    featuredProfiles
       .filter(profile => profile.user && typeof profile.user === 'object')
-      .map((profile) => {
+      .map(async (profile) => {
         const user = profile.user as { _id?: string; name?: string; slug?: string }
         const userId = String(user._id || '')
+        const ensuredSlug = userId ? await ensureUserSlug(userId, user.name) : user.slug
 
         return {
           profile: {
@@ -53,10 +55,15 @@ export default defineEventHandler(async () => {
           },
           toursCount: countsByUserId[userId] ?? 0,
           user: {
+            id: userId,
             name: user.name,
-            slug: user.slug,
+            slug: ensuredSlug || user.slug,
           },
         }
       }),
+  )
+
+  return {
+    organizers,
   }
 })

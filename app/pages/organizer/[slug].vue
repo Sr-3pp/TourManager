@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import type { OrganizerResponse } from '~~/types/profile'
 
-const {params} = useRoute()
+const { params } = useRoute()
 const slug = computed(() =>
   String(Array.isArray(params.slug) ? params.slug[0] : params.slug || '')
     .trim()
     .toLowerCase(),
 )
 
-const {getToursByOrganizer} = useTour();
+const { getToursByOrganizer } = useTour()
 
 const { data, error, status } = await useAsyncData<OrganizerResponse>(
   () => `organizer-${slug.value}`,
@@ -41,7 +41,7 @@ const organizer = computed<OrganizerResponse['user'] | null>(() => data.value?.u
 const organizerProfile = computed(() => organizer.value?.profile ?? null)
 const tours = computed(() => data.value?.tours || [])
 
-if (error.value || !organizer.value) {
+if (error.value || (status.value === 'success' && !organizer.value)) {
   throw createError({
     statusCode: 404,
     statusMessage: 'Organizer not found',

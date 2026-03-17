@@ -10,23 +10,6 @@ const props = defineProps<{
 }>()
 
 const socialNetworks = computed(() => props.profile?.social ?? null)
-const profileStats = computed(() => [
-  {
-    label: 'Tours',
-    value: String(props.tours.length),
-    icon: 'i-lucide-map',
-  },
-  {
-    label: 'Has banner',
-    value: props.profile?.banner ? 'Yes' : 'No',
-    icon: 'i-lucide-image',
-  },
-  {
-    label: 'Social links',
-    value: String(Object.values(props.profile?.social ?? {}).filter(Boolean).length),
-    icon: 'i-lucide-link',
-  },
-])
 </script>
 
 <template>
@@ -77,18 +60,6 @@ const profileStats = computed(() => [
               <slot name="actions" />
             </div>
           </div>
-
-          <div class="mt-6 grid gap-4 md:grid-cols-3">
-            <UCard v-for="stat in profileStats" :key="stat.label">
-              <div class="flex items-start justify-between gap-3">
-                <div>
-                  <p class="text-sm text-muted">{{ stat.label }}</p>
-                  <p class="mt-2 text-2xl font-semibold">{{ stat.value }}</p>
-                </div>
-                <UIcon :name="stat.icon" class="text-2xl text-primary" />
-              </div>
-            </UCard>
-          </div>
         </div>
       </div>
 
@@ -130,7 +101,24 @@ const profileStats = computed(() => [
           <UBadge color="secondary" variant="soft">{{ tours.length }} total</UBadge>
         </div>
 
-        <TourLIst v-if="tours.length" :tours="tours" />
+        <UCarousel
+          v-if="tours.length"
+          :items="tours"
+          arrows
+          dots
+          loop
+          class="pb-10"
+          :ui="{
+            item: 'basis-full md:basis-1/2 xl:basis-1/3',
+            prev: 'start-4 top-1/2',
+            next: 'end-4 top-1/2',
+            dots: 'relative inset-auto justify-center pt-4'
+          }"
+        >
+          <template #default="{ item: tour }">
+            <TourCard :tour="tour" />
+          </template>
+        </UCarousel>
         <UCard v-else class="rounded-3xl border-dashed">
           <p class="text-sm text-muted">No tours have been published yet.</p>
         </UCard>

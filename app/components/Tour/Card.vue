@@ -64,7 +64,7 @@ const organizerName = computed(() => {
         <template #footer>
             <div class="flex items-center justify-between gap-4">
                 <span class="text-sm text-muted">Spots and route details available on the full page.</span>
-                <UButton :to="`/tour/${tour._id}`" color="primary" variant="soft">
+                <UButton :to="`/tour/${tour._id}`" color="primary" variant="soft" class="w-1/3 flex-shrink-0 justify-center">
                     View details
                 </UButton>
             </div>

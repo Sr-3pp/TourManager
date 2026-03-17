@@ -28,6 +28,7 @@ export type FeaturedOrganizer = {
 	profile: Profile
 	toursCount: number
 	user: {
+		id?: string
 		name?: string
 		slug?: string
 	}

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { formatTourDate, formatTourPrice, getTourOrganizerName } from '~~/app/utils/tour'
 
-const { featuredTours, featuredTour, secondaryFeaturedTours, loadFeaturedTours } = useTour()
+const { featuredTours, featuredTour, loadFeaturedTours } = useTour()
 const { featuredOrganizers, loadFeaturedOrganizers } = useUser()
 
 const featuredDate = computed(() => {
@@ -14,7 +14,6 @@ const featuredDate = computed(() => {
 
 const featuredPrice = computed(() => formatTourPrice(featuredTour.value?.price))
 const featuredOrganizer = computed(() => getTourOrganizerName(featuredTour.value))
-const singleFeaturedTour = computed(() => featuredTours.value[0] ?? null)
 
 const { error } = await useAsyncData(
   'homepage-featured-content',
@@ -128,119 +127,22 @@ if (error.value) {
         </UCard>
       </div>
 
-      <div class="mt-12 space-y-6 sm:mt-16">
+      <div id="tour-showcase" class="mt-12 space-y-6 scroll-mt-28 sm:mt-16">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p class="text-sm font-medium uppercase tracking-[0.18em] text-primary">
-              Paid visibility placements
+              Paid homepage placements
             </p>
-            <h2 class="mt-2 text-3xl font-semibold tracking-tight">Featured tours</h2>
+            <h2 class="mt-2 text-3xl font-semibold tracking-tight">Featured organizers and tours</h2>
           </div>
           <p class="max-w-2xl text-sm leading-6 text-muted">
-            These cards come directly from the featured tour set managed in the shared tour composable.
+            Organizers and tours share the same row here, each inside its own carousel-driven panel.
           </p>
         </div>
 
-        <div v-if="featuredTours.length" id="tour-showcase" class="grid gap-6 lg:grid-cols-3 scroll-mt-28">
-          <TourCard v-for="tour in secondaryFeaturedTours" :key="tour._id" :tour="tour" />
-
-          <div v-if="singleFeaturedTour && secondaryFeaturedTours.length === 0" class="lg:col-span-3">
-            <TourCard :tour="singleFeaturedTour" />
-          </div>
-        </div>
-
-        <div v-else class="rounded-3xl border border-dashed border-default p-10 text-center">
-          <p class="text-lg font-semibold">No featured tours are available yet.</p>
-          <p class="mt-3 text-sm text-muted">
-            Mark a tour as featured after purchase and it will appear here automatically.
-          </p>
-        </div>
-      </div>
-
-      <div class="mt-12 space-y-6 sm:mt-16">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p class="text-sm font-medium uppercase tracking-[0.18em] text-primary">
-              Paid organizer placements
-            </p>
-            <h2 class="mt-2 text-3xl font-semibold tracking-tight">Featured organizers</h2>
-          </div>
-          <p class="max-w-2xl text-sm leading-6 text-muted">
-            Only organizers marked as featured after payment are shown here.
-          </p>
-        </div>
-
-        <div v-if="featuredOrganizers.length" class="grid gap-6 lg:grid-cols-3">
-          <UCard
-            v-for="entry in featuredOrganizers"
-            :key="entry.user.slug || entry.profile.user"
-            class="overflow-hidden rounded-[2rem]"
-          >
-            <div
-              v-if="entry.profile.banner"
-              class="h-36 bg-cover bg-center"
-              :style="{ backgroundImage: `linear-gradient(180deg, transparent, rgba(0,0,0,0.18)), url(/blob/${entry.profile.banner})` }"
-            />
-            <div v-else class="flex h-36 items-end bg-gradient-to-br from-secondary via-primary to-secondary p-5 text-inverted">
-              <div>
-                <p class="text-xs uppercase tracking-[0.3em] text-inverted/70">Paid placement</p>
-                <h3 class="mt-2 text-2xl font-bold">{{ entry.user.name || 'Organizer' }}</h3>
-              </div>
-            </div>
-
-            <div class="space-y-5 p-5">
-              <div class="flex items-center gap-4">
-                <div class="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-muted">
-                  <NuxtImg
-                    v-if="entry.profile.picture"
-                    :src="`/blob/${entry.profile.picture}`"
-                    :alt="`${entry.user.name || 'Organizer'} picture`"
-                    class="h-full w-full object-cover"
-                  />
-                  <UIcon v-else name="i-lucide-user-round" class="text-2xl text-muted" />
-                </div>
-
-                <div class="min-w-0">
-                  <p class="text-sm font-medium uppercase tracking-[0.18em] text-primary">Featured organizer</p>
-                  <h3 class="truncate text-2xl font-semibold">{{ entry.user.name || 'Organizer' }}</h3>
-                  <p v-if="entry.user.slug" class="mt-1 text-sm text-muted">@{{ entry.user.slug }}</p>
-                </div>
-              </div>
-
-              <p class="text-sm leading-6 text-muted">
-                {{ entry.profile.bio || 'This organizer has secured homepage placement and will appear here while their public profile continues to take shape.' }}
-              </p>
-
-              <div class="grid grid-cols-2 gap-3">
-                <div class="rounded-2xl bg-muted/40 p-4">
-                  <p class="text-xs uppercase tracking-[0.18em] text-muted">Tours</p>
-                  <p class="mt-2 font-semibold">{{ entry.toursCount }}</p>
-                </div>
-                <div class="rounded-2xl bg-muted/40 p-4">
-                  <p class="text-xs uppercase tracking-[0.18em] text-muted">Social links</p>
-                  <p class="mt-2 font-semibold">{{ Object.values(entry.profile.social || {}).filter(Boolean).length }}</p>
-                </div>
-              </div>
-
-              <div class="flex flex-wrap gap-3">
-                <UButton
-                  v-if="entry.user.slug"
-                  :to="`/organizer/${entry.user.slug}`"
-                  color="secondary"
-                >
-                  View organizer
-                </UButton>
-                <UBadge color="secondary" variant="soft">Featured after payment</UBadge>
-              </div>
-            </div>
-          </UCard>
-        </div>
-
-        <div v-else class="rounded-3xl border border-dashed border-default p-10 text-center">
-          <p class="text-lg font-semibold">No featured organizers are available yet.</p>
-          <p class="mt-3 text-sm text-muted">
-            Once an organizer has paid and an admin marks their profile as featured, they will appear here automatically.
-          </p>
+        <div class="grid gap-6 lg:grid-cols-3 lg:items-start">
+          <HomeFeaturedOrganizersPanel :organizers="featuredOrganizers" />
+          <HomeFeaturedToursPanel :tours="featuredTours" />
         </div>
       </div>
     </UContainer>
