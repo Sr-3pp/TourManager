@@ -5,6 +5,7 @@ export type Tour = {
   date: string | Date
   location: string
   image: string | null
+  featured?: boolean
   creator?: string | TourCreatorSummary
   price: number
   attendees: TourAttendee[]
@@ -86,6 +87,7 @@ export type TourCreateBody = {
   date?: string
   location?: string
   image?: string | null
+  featured?: boolean
   attendees?: unknown
   sponsors?: unknown
   packages?: unknown

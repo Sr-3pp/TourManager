@@ -1,3 +1,4 @@
+import type { H3Event } from 'h3'
 import {
   compressProfileImageForUpload,
   MAX_PROFILE_UPLOAD_SOURCE_BYTES,
@@ -59,6 +60,29 @@ export function normalizeNullableString(value: unknown, field: string) {
   }
 
   return normalizeString(value, field)
+}
+
+export function normalizeBoolean(value: unknown, field: string) {
+  if (typeof value === 'boolean') {
+    return value
+  }
+
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase()
+
+    if (normalized === 'true') {
+      return true
+    }
+
+    if (normalized === 'false') {
+      return false
+    }
+  }
+
+  throw createError({
+    statusCode: 400,
+    statusMessage: `${field} must be a boolean`,
+  })
 }
 
 export function normalizeDate(value: unknown, field: string) {
@@ -288,7 +312,7 @@ export function normalizeDeparturePoints(value: unknown, options?: NestedFieldOp
   })
 }
 
-export async function parseTourBody(event: Parameters<typeof defineEventHandler>[0], sessionUserId: string) {
+export async function parseTourBody(event: H3Event, sessionUserId: string) {
   const hubBlob = useHubBlob()
   const contentType = String(getRequestHeader(event, 'content-type') || '').toLowerCase()
   const isMultipart = contentType.includes('multipart/form-data')
@@ -309,6 +333,7 @@ export async function parseTourBody(event: Parameters<typeof defineEventHandler>
       description: field('description'),
       location: field('location'),
       date: field('date'),
+      featured: field('featured') === undefined ? undefined : field('featured') === 'true',
       attendees: parseMultipartJson(field('attendees'), 'attendees'),
       sponsors: parseMultipartJson(field('sponsors'), 'sponsors'),
       packages: parseMultipartJson(field('packages'), 'packages'),

@@ -1,9 +1,11 @@
-import type { Tour, TourFormState, TourResponse, ToursByOrganizerResponse } from '~~/types/tour'
+import type { Tour, TourFormState, TourListResponse, TourResponse, ToursByOrganizerResponse } from '~~/types/tour'
 
 export const useTour = () => {
-  const toursById = ref<Record<string, Tour>>({})
-  const activeTourId = ref<string | null>(null)
-  const organizerTours = ref<Record<string, Tour[]>>({})
+  const toursById = useState<Record<string, Tour>>('tour-tours-by-id', () => ({}))
+  const tours = useState<Tour[]>('tour-tours', () => [])
+  const featuredTours = useState<Tour[]>('tour-featured-tours', () => [])
+  const activeTourId = useState<string | null>('tour-active-id', () => null)
+  const organizerTours = useState<Record<string, Tour[]>>('tour-organizer-tours', () => ({}))
   const tour = computed(() => {
     if (!activeTourId.value) {
       return undefined
@@ -11,11 +13,69 @@ export const useTour = () => {
 
     return toursById.value[activeTourId.value]
   })
+  const featuredTour = computed(() => featuredTours.value[0] ?? null)
+  const secondaryFeaturedTours = computed(() => featuredTours.value.slice(1))
 
   const isLoading = ref(false)
   const isSaving = ref(false)
   const errorMessage = ref<string | null>(null)
   const successMessage = ref<string | null>(null)
+
+  const loadTours = async (options?: { force?: boolean }) => {
+    const force = options?.force ?? false
+
+    if (!force && tours.value.length > 0) {
+      return tours.value
+    }
+
+    try {
+      const data = await $fetch<TourListResponse>('/api/tours', {
+        credentials: 'include',
+      })
+
+      tours.value = data.tours
+
+      for (const entry of data.tours) {
+        if (entry._id) {
+          toursById.value[entry._id] = entry
+        }
+      }
+
+      return tours.value
+    } catch (error) {
+      console.error('Error loading tours:', error)
+      errorMessage.value = 'Could not load tours.'
+      throw error
+    }
+  }
+
+  const loadFeaturedTours = async (options?: { force?: boolean }) => {
+    const force = options?.force ?? false
+
+    if (!force && featuredTours.value.length > 0) {
+      return featuredTours.value
+    }
+
+    try {
+      const data = await $fetch<TourListResponse>('/api/tours/featured', {
+        credentials: 'include',
+      })
+
+      featuredTours.value = data.tours
+
+      for (const entry of data.tours) {
+        if (entry._id) {
+          toursById.value[entry._id] = entry
+        }
+      }
+
+      return featuredTours.value
+    } catch (error) {
+      console.error('Error loading featured tours:', error)
+      errorMessage.value = 'Could not load featured tours.'
+      throw error
+    }
+  }
 
   const loadTour = async (id: string, options?: { force?: boolean }) => {
     const force = options?.force ?? false
@@ -89,6 +149,30 @@ export const useTour = () => {
       if (savedTour?._id) {
         toursById.value[savedTour._id] = savedTour
         activeTourId.value = savedTour._id
+      }
+
+      if (savedTour?._id) {
+        const index = tours.value.findIndex(item => item._id === savedTour._id)
+
+        if (index >= 0) {
+          tours.value.splice(index, 1, savedTour)
+        } else {
+          tours.value.unshift(savedTour)
+        }
+      }
+
+      if (savedTour?._id) {
+        const featuredIndex = featuredTours.value.findIndex(item => item._id === savedTour._id)
+
+        if (savedTour.featured) {
+          if (featuredIndex >= 0) {
+            featuredTours.value.splice(featuredIndex, 1, savedTour)
+          } else {
+            featuredTours.value.unshift(savedTour)
+          }
+        } else if (featuredIndex >= 0) {
+          featuredTours.value.splice(featuredIndex, 1)
+        }
       }
 
       const creator = savedTour?.creator
@@ -179,11 +263,17 @@ export const useTour = () => {
   }
 
   return {
+    tours,
     tour,
+    featuredTours,
+    featuredTour,
+    secondaryFeaturedTours,
     isLoading,
     isSaving,
     errorMessage,
     successMessage,
+    loadTours,
+    loadFeaturedTours,
     loadTour,
     saveTour,
     resetTourFormState,

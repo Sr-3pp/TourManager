@@ -2,6 +2,7 @@ import { Tour } from '~~/server/models/Tour'
 import { getSessionWithProfile } from '~~/server/utils/auth'
 import {
   normalizeAttendees,
+  normalizeBoolean,
   normalizeDate,
   normalizeDeparturePoints,
   normalizeNullableString,
@@ -30,7 +31,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const existingTour = await Tour.findById(id).select('creator')
+  const existingTour = await Tour.findOne({ _id: id }).select('creator')
 
   if (!existingTour) {
     throw createError({
@@ -66,6 +67,10 @@ export default defineEventHandler(async (event) => {
     update.date = normalizeDate(body.date, 'date')
   }
 
+  if ('featured' in body && body.featured !== undefined) {
+    update.featured = normalizeBoolean(body.featured, 'featured')
+  }
+
   if ('image' in body && body.image !== undefined) {
     update.image = normalizeNullableString(body.image, 'image')
   }
@@ -90,8 +95,8 @@ export default defineEventHandler(async (event) => {
     update.image = imagePath
   }
 
-  const updated = await Tour.findByIdAndUpdate(
-    id,
+  const updated = await Tour.findOneAndUpdate(
+    { _id: id },
     {
       ...(Object.keys(update).length > 0 ? { $set: update } : {}),
     },

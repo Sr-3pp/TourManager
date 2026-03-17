@@ -4,8 +4,8 @@ import { dbConnect } from '~~/server/utils/db'
 export default defineEventHandler(async () => {
   await dbConnect()
 
-  const tours = await Tour.find()
-    .sort({ date: -1 })
+  const tours = await Tour.find({ featured: true })
+    .sort({ date: 1 })
     .populate('creator', 'name slug')
     .lean()
 

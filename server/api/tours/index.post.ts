@@ -2,6 +2,7 @@ import { Tour } from '~~/server/models/Tour'
 import { getSessionWithProfile } from '~~/server/utils/auth'
 import {
   normalizeAttendees,
+  normalizeBoolean,
   normalizeDate,
   normalizeDeparturePoints,
   normalizeNullableString,
@@ -28,6 +29,7 @@ export default defineEventHandler(async (event) => {
   const description = normalizeString(body.description, 'description')
   const location = normalizeString(body.location, 'location')
   const date = normalizeDate(body.date, 'date')
+  const featured = body.featured === undefined ? false : normalizeBoolean(body.featured, 'featured')
   const attendees = normalizeAttendees(body.attendees)
   const sponsors = normalizeSponsors(body.sponsors)
   const packages = normalizePackages(body.packages)
@@ -42,6 +44,7 @@ export default defineEventHandler(async (event) => {
     description,
     location,
     date,
+    featured,
     image: imagePath ?? null,
     creator: session.user.id,
     attendees,

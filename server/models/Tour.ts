@@ -25,6 +25,10 @@ const TourSchema = new mongoose.Schema(
         type: String,
         default: null,
     },
+    featured: {
+        type: Boolean,
+        default: false,
+    },
     creator: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
@@ -166,4 +170,4 @@ const TourSchema = new mongoose.Schema(
 )
 
 export const Tour =
-  mongoose.models.Tour || mongoose.model('Tour', TourSchema)
+  (mongoose.models.Tour as mongoose.Model<any>) || mongoose.model('Tour', TourSchema)
