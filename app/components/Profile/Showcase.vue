@@ -50,12 +50,10 @@ const profileStats = computed(() => [
         />
         <div
           v-else
-          class="flex h-44 items-end bg-gradient-to-br from-primary via-secondary to-primary p-6 text-inverted sm:h-56 lg:h-64"
+          class="flex h-44 items-end justify-end flex-col bg-gradient-to-br from-primary via-secondary to-primary p-6 text-inverted sm:h-56 lg:h-64"
         >
-          <div>
-            <p class="text-xs uppercase tracking-[0.3em] text-inverted/80">Organizer Profile</p>
-            <h1 class="mt-3 text-3xl font-bold sm:text-4xl">{{ user?.name || 'Profile' }}</h1>
-          </div>
+          <p class="text-xs uppercase tracking-[0.3em] text-inverted/80">Organizer Profile</p>
+          <h1 class="mt-3 text-3xl font-bold sm:text-4xl">{{ user?.name || 'Profile' }}</h1>
         </div>
 
         <div class="px-5 pb-6 pt-5 sm:px-8 sm:pb-8">

@@ -12,6 +12,22 @@ import {
   parseTourBody,
 } from '~~/server/utils/tour'
 
+const scalarFieldNormalizers = {
+  name: (value: unknown) => normalizeString(value, 'name', { required: true }),
+  description: (value: unknown) => normalizeString(value, 'description'),
+  location: (value: unknown) => normalizeString(value, 'location'),
+  date: (value: unknown) => normalizeDate(value, 'date'),
+  featured: (value: unknown) => normalizeBoolean(value, 'featured'),
+  image: (value: unknown) => normalizeNullableString(value, 'image'),
+} satisfies Record<string, (value: unknown) => unknown>
+
+const collectionFieldNormalizers = {
+  attendees: (value: unknown) => normalizeAttendees(value, { requiredFields: true }),
+  sponsors: (value: unknown) => normalizeSponsors(value, { requiredFields: true }),
+  packages: (value: unknown) => normalizePackages(value, { requiredFields: true }),
+  departure_points: (value: unknown) => normalizeDeparturePoints(value, { requiredFields: true }),
+} satisfies Record<string, (value: unknown) => unknown>
+
 export default defineEventHandler(async (event) => {
   const id = String(getRouterParam(event, 'id') || '').trim()
 
@@ -51,44 +67,20 @@ export default defineEventHandler(async (event) => {
 
   const update: Record<string, unknown> = {}
 
-  if ('name' in body && body.name !== undefined) {
-    update.name = normalizeString(body.name, 'name', { required: true })
+  for (const [field, normalize] of Object.entries(scalarFieldNormalizers)) {
+    const value = body[field as keyof typeof body]
+
+    if (value !== undefined) {
+      update[field] = normalize(value)
+    }
   }
 
-  if ('description' in body && body.description !== undefined) {
-    update.description = normalizeString(body.description, 'description')
-  }
+  for (const [field, normalize] of Object.entries(collectionFieldNormalizers)) {
+    const value = body[field as keyof typeof body]
 
-  if ('location' in body && body.location !== undefined) {
-    update.location = normalizeString(body.location, 'location')
-  }
-
-  if ('date' in body && body.date !== undefined) {
-    update.date = normalizeDate(body.date, 'date')
-  }
-
-  if ('featured' in body && body.featured !== undefined) {
-    update.featured = normalizeBoolean(body.featured, 'featured')
-  }
-
-  if ('image' in body && body.image !== undefined) {
-    update.image = normalizeNullableString(body.image, 'image')
-  }
-
-  if ('attendees' in body && body.attendees !== undefined) {
-    update.attendees = normalizeAttendees(body.attendees, { requiredFields: true })
-  }
-
-  if ('sponsors' in body && body.sponsors !== undefined) {
-    update.sponsors = normalizeSponsors(body.sponsors, { requiredFields: true })
-  }
-
-  if ('packages' in body && body.packages !== undefined) {
-    update.packages = normalizePackages(body.packages, { requiredFields: true })
-  }
-
-  if ('departure_points' in body && body.departure_points !== undefined) {
-    update.departure_points = normalizeDeparturePoints(body.departure_points, { requiredFields: true })
+    if (value !== undefined) {
+      update[field] = normalize(value)
+    }
   }
 
   if (imagePath !== undefined) {
@@ -101,7 +93,7 @@ export default defineEventHandler(async (event) => {
       ...(Object.keys(update).length > 0 ? { $set: update } : {}),
     },
     {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     },
   )

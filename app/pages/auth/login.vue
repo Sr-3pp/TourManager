@@ -28,17 +28,17 @@ const loginFields: AuthFormField[] = [
 
 type LoginSchema = z.output<typeof loginSchema>
 
-function onSubmit(event: FormSubmitEvent<LoginSchema>) {
+async function onSubmit(event: FormSubmitEvent<LoginSchema>) {
     const { email, password } = event.data
-    loginUser(email, password)
-        .then(async () => {
-            await fetchSession()
-        })
-        .catch((error) => {
-            console.error('Error during login:', error)
-        })
-}
 
+    try {
+        await loginUser(email, password)
+        await fetchSession()
+        await navigateTo('/profile')
+    } catch (error) {
+        console.error('Error during login:', error)
+    }
+}
 </script>
 
 <template>

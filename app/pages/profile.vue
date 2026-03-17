@@ -12,11 +12,14 @@ await loadProfile()
 
 const profileModal = ref(false)
 const tourModal = ref(false)
+const organizerId = computed(() => profile.value?.user ?? '')
 
-const tours = await getToursByOrganizer(profile.value!.user || '').catch((err) => {
-    console.error('Error fetching tours for organizer:', err)
-    return []
-})
+const tours = organizerId.value
+    ? await getToursByOrganizer(organizerId.value).catch((err) => {
+        console.error('Error fetching tours for organizer:', err)
+        return []
+    })
+    : []
 </script>
 
 <template>

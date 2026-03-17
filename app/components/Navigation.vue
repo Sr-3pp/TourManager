@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const route = useRoute()
-const { session, fetchSession } = useAuth()
+const { session, fetchSession, logoutUser } = useAuth()
 
 await fetchSession()
 
@@ -20,16 +20,31 @@ const navItems = computed(() => {
       icon: 'i-lucide-users',
       visible: Boolean(user.value),
     },
-    {
-      label: 'Profile',
-      to: '/profile',
-      icon: 'i-lucide-user-round',
-      visible: Boolean(user.value),
-    },
   ]
 
   return items.filter(item => item.visible)
 })
+
+const userMenuItems = computed(() => [
+  [
+    {
+      label: 'Profile',
+      icon: 'i-lucide-user-round',
+      to: '/profile',
+    },
+  ],
+  [
+    {
+      label: 'Logout',
+      icon: 'i-lucide-log-out',
+      color: 'error',
+      onSelect: async () => {
+        await logoutUser()
+        await navigateTo('/auth/login')
+      },
+    },
+  ],
+])
 
 function isActive(path: string) {
   if (path === '/') {
@@ -83,15 +98,21 @@ function isActive(path: string) {
 
           <div class="flex items-center gap-2">
             <template v-if="user">
-              <div class="flex min-w-0 items-center gap-3 rounded-2xl border border-default bg-muted/40 px-3 py-2">
-                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <UIcon name="i-lucide-user-round" class="text-lg" />
-                </div>
-                <div class="min-w-0">
-                  <p class="truncate text-sm font-medium">{{ user.name }}</p>
-                  <p class="truncate text-xs text-muted">{{ user.email }}</p>
-                </div>
-              </div>
+              <UDropdownMenu :items="userMenuItems" :content="{ align: 'end' }">
+                <button
+                  type="button"
+                  class="flex min-w-0 items-center gap-3 rounded-2xl border border-default bg-muted/40 px-3 py-2 text-left transition hover:border-secondary/30 hover:bg-secondary/10"
+                >
+                  <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <UIcon name="i-lucide-user-round" class="text-lg" />
+                  </div>
+                  <div class="min-w-0">
+                    <p class="truncate text-sm font-medium">{{ user.name }}</p>
+                    <p class="truncate text-xs text-muted">{{ user.email }}</p>
+                  </div>
+                  <UIcon name="i-lucide-chevron-down" class="text-base text-muted" />
+                </button>
+              </UDropdownMenu>
             </template>
 
             <template v-else>

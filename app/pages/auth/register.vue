@@ -2,7 +2,7 @@
 import * as z from 'zod'
 import type { AuthFormField, FormSubmitEvent } from '@nuxt/ui'
 
-const { registerUser, loginUser } = useAuth()
+const { registerUser, loginUser, fetchSession } = useAuth()
 
 const registerSchema = z.object({
     name: z.string().min(2),
@@ -47,13 +47,24 @@ const registerFields: AuthFormField[] = [
 
 type RegisterSchema = z.output<typeof registerSchema>
 
-function onSubmit(event: FormSubmitEvent<RegisterSchema>) {
+async function onSubmit(event: FormSubmitEvent<RegisterSchema>) {
     const { email, password, name } = event.data
-    registerUser(email, password, name)
-        .then(() => loginUser(email, password))
-        .catch((error) => {
-            console.error('Error during registration or login:', error)
-        })
+
+    try {
+        await registerUser(email, password, name)
+        let session = await fetchSession()
+
+        if (!session) {
+            await loginUser(email, password)
+            session = await fetchSession()
+        }
+
+        if (session) {
+            await navigateTo('/profile')
+        }
+    } catch (error) {
+        console.error('Error during registration or login:', error)
+    }
 }
 </script>
 

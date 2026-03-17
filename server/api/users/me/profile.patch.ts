@@ -30,6 +30,14 @@ function isOwnedProfileBlob(path: unknown, userId: string): path is string {
   return typeof path === 'string' && path.startsWith(`profiles/${userId}/`)
 }
 
+const profileFieldNormalizers = {
+  bio: normalizeString,
+  picture: normalizeNullableString,
+  banner: normalizeNullableString,
+} satisfies Record<'bio' | 'picture' | 'banner', typeof normalizeString | typeof normalizeNullableString>
+
+const socialFieldNames = ['instagram', 'x', 'tiktok'] as const
+
 export default defineEventHandler(async (event) => {
   const hubBlob = useHubBlob()
   const session = await getSessionWithProfile(event)
@@ -133,20 +141,18 @@ export default defineEventHandler(async (event) => {
 
   const update: Record<string, string | null> = {}
 
-  if ('bio' in body && body.bio !== undefined) {
-    update.bio = normalizeString(body.bio, 'bio')
-  }
+  for (const [field, normalize] of Object.entries(profileFieldNormalizers) as Array<
+    [keyof typeof profileFieldNormalizers, (value: unknown, field: string) => string | null]
+  >) {
+    const value = body[field]
 
-  if ('picture' in body && body.picture !== undefined) {
-    update.picture = normalizeNullableString(body.picture, 'picture')
+    if (value !== undefined) {
+      update[field] = normalize(value, field)
+    }
   }
 
   if (pictureUploadPath) {
     update.picture = pictureUploadPath
-  }
-
-  if ('banner' in body && body.banner !== undefined) {
-    update.banner = normalizeNullableString(body.banner, 'banner')
   }
 
   if (bannerUploadPath) {
@@ -161,16 +167,12 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    if ('instagram' in body.social && body.social.instagram !== undefined) {
-      update['social.instagram'] = normalizeString(body.social.instagram, 'social.instagram')
-    }
+    for (const field of socialFieldNames) {
+      const value = body.social[field]
 
-    if ('x' in body.social && body.social.x !== undefined) {
-      update['social.x'] = normalizeString(body.social.x, 'social.x')
-    }
-
-    if ('tiktok' in body.social && body.social.tiktok !== undefined) {
-      update['social.tiktok'] = normalizeString(body.social.tiktok, 'social.tiktok')
+      if (value !== undefined) {
+        update[`social.${field}`] = normalizeString(value, `social.${field}`)
+      }
     }
   }
 
@@ -184,7 +186,7 @@ export default defineEventHandler(async (event) => {
         },
       },
       {
-        new: true,
+        returnDocument: 'after',
         runValidators: true,
         setDefaultsOnInsert: true,
         upsert: true,

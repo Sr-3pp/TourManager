@@ -56,9 +56,25 @@ export const useAuth = () => {
         }
     }
 
+    const logoutUser = async () => {
+        try {
+            await $fetch('/api/auth/sign-out', {
+                method: 'POST',
+                credentials: 'include',
+                body: {},
+            })
+        } catch (error) {
+            console.error('Error logging out user:', error)
+            throw error
+        } finally {
+            session.value = null
+        }
+    }
+
     return {
         registerUser,
         loginUser,
+        logoutUser,
         session,
         fetchSession,
     }

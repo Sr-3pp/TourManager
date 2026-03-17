@@ -21,7 +21,7 @@ export async function ensureProfileForUser(userId: string) {
       },
     },
     {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
       setDefaultsOnInsert: true,
       upsert: true,
@@ -111,4 +111,24 @@ export async function getSessionWithProfile(event: H3Event) {
     ...session,
     user: user ? { ...session.user, ...user.toJSON() } : session.user,
   }
+}
+
+export async function requireUserLevel(event: H3Event, level: number) {
+  const session = await getSessionWithProfile(event)
+
+  if (!session) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: 'Unauthorized',
+    })
+  }
+
+  if (Number(session.user.level) !== level) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: 'Forbidden',
+    })
+  }
+
+  return session
 }

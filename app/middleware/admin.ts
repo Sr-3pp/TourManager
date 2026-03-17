@@ -9,6 +9,8 @@ export default defineNuxtRouteMiddleware(async () => {
     return navigateTo('/auth/login')
   }
 
+  console.log('User level:', session.value.user)
+
   if (session.value.user.level !== 3) {
     return navigateTo('/')
   }
