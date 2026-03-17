@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import type { Profile, ProfileUser } from '~~/types/profile'
+
 defineProps<{
-    user: SessionUser | null
+    user: ProfileUser | null
     profile: Profile | null
 }>()
 </script>
