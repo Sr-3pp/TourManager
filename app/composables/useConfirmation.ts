@@ -28,7 +28,7 @@ function getConfirmationErrorMessage(error: unknown) {
     return error.message
   }
 
-  return 'Action failed.'
+  return 'La acción falló.'
 }
 
 function resetConfirmationState(state: Ref<ConfirmationState>) {
@@ -36,8 +36,8 @@ function resetConfirmationState(state: Ref<ConfirmationState>) {
     open: false,
     title: '',
     description: '',
-    confirmLabel: 'Confirm',
-    cancelLabel: 'Cancel',
+    confirmLabel: 'Confirmar',
+    cancelLabel: 'Cancelar',
     color: 'primary',
     icon: 'i-lucide-circle-alert',
     loading: false,
@@ -50,8 +50,8 @@ export const useConfirmation = () => {
     open: false,
     title: '',
     description: '',
-    confirmLabel: 'Confirm',
-    cancelLabel: 'Cancel',
+    confirmLabel: 'Confirmar',
+    cancelLabel: 'Cancelar',
     color: 'primary',
     icon: 'i-lucide-circle-alert',
     loading: false,
@@ -67,8 +67,8 @@ export const useConfirmation = () => {
       open: true,
       title: options.title,
       description: options.description,
-      confirmLabel: options.confirmLabel || 'Confirm',
-      cancelLabel: options.cancelLabel || 'Cancel',
+      confirmLabel: options.confirmLabel || 'Confirmar',
+      cancelLabel: options.cancelLabel || 'Cancelar',
       color: options.color || 'primary',
       icon: options.icon || 'i-lucide-circle-alert',
       loading: false,

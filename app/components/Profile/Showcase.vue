@@ -30,8 +30,8 @@ const socialNetworks = computed(() => props.profile?.social ?? null)
           v-else
           class="flex h-44 items-end justify-end flex-col bg-gradient-to-br from-primary via-secondary to-primary p-6 text-inverted sm:h-56 lg:h-64"
         >
-          <p class="text-xs uppercase tracking-[0.3em] text-inverted/80">Organizer Profile</p>
-          <h1 class="mt-3 text-3xl font-bold sm:text-4xl">{{ user?.name || 'Profile' }}</h1>
+          <p class="text-xs uppercase tracking-[0.3em] text-inverted/80">Perfil del organizador</p>
+          <h1 class="mt-3 text-3xl font-bold sm:text-4xl">{{ user?.name || 'Perfil' }}</h1>
         </div>
 
         <div class="px-5 pb-6 pt-5 sm:px-8 sm:pb-8">
@@ -43,16 +43,16 @@ const socialNetworks = computed(() => props.profile?.social ?? null)
                 <NuxtImg
                   v-if="profile?.picture"
                   :src="`/blob/${profile.picture}`"
-                  :alt="`${user?.name || 'Profile'} picture`"
+                  :alt="`${user?.name || 'Perfil'} foto`"
                   class="h-full w-full object-cover"
                 />
                 <UIcon v-else name="i-lucide-user-round" class="text-4xl text-muted" />
               </div>
 
               <div class="min-w-0">
-                <h2 class="truncate text-3xl font-bold tracking-tight sm:text-4xl">{{ user?.name || 'Profile' }}</h2>
+                <h2 class="truncate text-3xl font-bold tracking-tight sm:text-4xl">{{ user?.name || 'Perfil' }}</h2>
                 <p v-if="user?.slug" class="mt-2 text-sm font-medium text-primary">@{{ user.slug }}</p>
-                <p v-else class="mt-2 text-sm text-muted">Public organizer profile</p>
+                <p v-else class="mt-2 text-sm text-muted">Perfil público del organizador</p>
               </div>
             </div>
 
@@ -67,12 +67,12 @@ const socialNetworks = computed(() => props.profile?.social ?? null)
         <UCard class="rounded-3xl">
           <div class="space-y-4">
             <div>
-              <p class="text-sm font-medium uppercase tracking-[0.18em] text-primary">About</p>
-              <h3 class="mt-2 text-2xl font-semibold">Profile Overview</h3>
+              <p class="text-sm font-medium uppercase tracking-[0.18em] text-primary">Acerca de</p>
+              <h3 class="mt-2 text-2xl font-semibold">Resumen del perfil</h3>
             </div>
 
             <p class="max-w-3xl text-base leading-7 text-muted">
-              {{ profile?.bio || 'This organizer has not added a public bio yet.' }}
+              {{ profile?.bio || 'Este organizador aún no ha agregado una biografía pública.' }}
             </p>
           </div>
         </UCard>
@@ -81,12 +81,12 @@ const socialNetworks = computed(() => props.profile?.social ?? null)
           <div class="space-y-4">
             <div>
               <p class="text-sm font-medium uppercase tracking-[0.18em] text-primary">Social</p>
-              <h3 class="mt-2 text-2xl font-semibold">Stay Connected</h3>
+              <h3 class="mt-2 text-2xl font-semibold">Mantente conectado</h3>
             </div>
 
             <SocialNetworks v-if="socialNetworks" :social-networks="socialNetworks" />
             <div v-else class="rounded-2xl border border-dashed border-default p-5 text-sm text-muted">
-              Social links have not been added yet.
+              Aún no se han agregado enlaces sociales.
             </div>
           </div>
         </UCard>
@@ -96,9 +96,9 @@ const socialNetworks = computed(() => props.profile?.social ?? null)
         <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p class="text-sm font-medium uppercase tracking-[0.18em] text-primary">Tours</p>
-            <h3 class="text-2xl font-semibold">{{ toursTitle || 'Published tours' }}</h3>
+            <h3 class="text-2xl font-semibold">{{ toursTitle || 'Tours publicados' }}</h3>
           </div>
-          <UBadge color="secondary" variant="soft">{{ tours.length }} total</UBadge>
+          <UBadge color="secondary" variant="soft">{{ tours.length }} en total</UBadge>
         </div>
 
         <UCarousel
@@ -120,7 +120,7 @@ const socialNetworks = computed(() => props.profile?.social ?? null)
           </template>
         </UCarousel>
         <UCard v-else class="rounded-3xl border-dashed">
-          <p class="text-sm text-muted">No tours have been published yet.</p>
+          <p class="text-sm text-muted">Aún no se han publicado tours.</p>
         </UCard>
       </div>
     </UContainer>

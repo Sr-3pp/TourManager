@@ -10,7 +10,7 @@ const registerSchema = z.object({
     password: z.string().min(6),
     verifyPassword: z.string().min(6),
 }).refine((data) => data.password === data.verifyPassword, {
-    message: "Passwords don't match",
+    message: 'Las contraseñas no coinciden',
     path: ['verifyPassword'],
 })
 
@@ -18,29 +18,29 @@ const registerFields: AuthFormField[] = [
     {
         name: 'name',
         type: 'text',
-        label: 'Name',
-        placeholder: 'Enter your name',
+        label: 'Nombre',
+        placeholder: 'Ingresa tu nombre',
         required: true,
     },
     {
         name: 'email',
         type: 'email',
-        label: 'Email',
-        placeholder: 'Enter your email',
+        label: 'Correo electrónico',
+        placeholder: 'Ingresa tu correo electrónico',
         required: true,
     },
     {
         name: 'password',
         type: 'password',
-        label: 'Password',
-        placeholder: 'Create a password',
+        label: 'Contraseña',
+        placeholder: 'Crea una contraseña',
         required: true,
     },
     {
         name: 'verifyPassword',
         type: 'password',
-        label: 'Confirm Password',
-        placeholder: 'Repeat your password',
+        label: 'Confirmar contraseña',
+        placeholder: 'Repite tu contraseña',
         required: true,
     },
 ]
@@ -61,23 +61,23 @@ async function onSubmit(event: FormSubmitEvent<z.output<typeof registerSchema>>)
             await navigateTo('/profile')
         }
     } catch (error) {
-        console.error('Error during registration or login:', error)
+        console.error('Error durante el registro o inicio de sesión:', error)
     }
 }
 </script>
 
 <template>
 <UContainer class="py-8">
-    <h1 class="text-2xl font-bold mb-4">Register</h1>
-        <p class="text-gray-600 mb-4">Create your account to continue.</p>
+    <h1 class="text-2xl font-bold mb-4">Registro</h1>
+        <p class="text-gray-600 mb-4">Crea tu cuenta para continuar.</p>
 
         <UAuthForm
             :schema="registerSchema"
             :fields="registerFields"
-            title="Create account"
-            description="Fill in your details to get started."
+            title="Crear cuenta"
+            description="Completa tus datos para comenzar."
             icon="i-lucide-user-plus"
-            :submit="{ label: 'Create account' }"
+            :submit="{ label: 'Crear cuenta' }"
             class="max-w-md"
             @submit="onSubmit"
         />

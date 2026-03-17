@@ -23,13 +23,13 @@ const organizerName = computed(() => {
     <UCard class="h-full rounded-3xl">
         <template #header>
             <figure class="overflow-hidden rounded-2xl">
-                <NuxtImg v-if="tour.image" :src="`/blob/${tour.image}`" alt="Tour Image" class="h-48 w-full object-cover" />
+                <NuxtImg v-if="tour.image" :src="`/blob/${tour.image}`" alt="Imagen del tour" class="h-48 w-full object-cover" />
                 <div
                     v-else
                     class="flex h-48 w-full items-center justify-center bg-gradient-to-br from-primary via-secondary to-primary text-inverted"
                 >
                     <div class="text-center">
-                        <p class="text-xs uppercase tracking-[0.28em] text-inverted/70">Live Tour</p>
+                        <p class="text-xs uppercase tracking-[0.28em] text-inverted/70">Tour en vivo</p>
                         <p class="mt-2 text-lg font-semibold">{{ tour.name }}</p>
                     </div>
                 </div>
@@ -45,14 +45,14 @@ const organizerName = computed(() => {
             <div>
                 <h2 class="text-2xl font-bold tracking-tight">{{ tour.name }}</h2>
                 <p class="mt-3 line-clamp-3 text-sm leading-6 text-muted">
-                    {{ tour.description || 'Tour details are being prepared. Check the full page for the latest route, timing, and host updates.' }}
+                    {{ tour.description || 'Se están preparando los detalles del tour. Revisa la página completa para ver las últimas actualizaciones de ruta, horarios y organizador.' }}
                 </p>
             </div>
 
             <div class="grid gap-3 text-sm text-muted sm:grid-cols-2">
                 <div class="flex items-center gap-2">
                     <UIcon name="i-lucide-map-pinned" class="text-base text-primary" />
-                    <span>{{ tour.location || 'Location to be announced' }}</span>
+                    <span>{{ tour.location || 'Ubicación por confirmar' }}</span>
                 </div>
                 <div class="flex items-center gap-2">
                     <UIcon name="i-lucide-user-round" class="text-base text-primary" />
@@ -63,9 +63,9 @@ const organizerName = computed(() => {
 
         <template #footer>
             <div class="flex items-center justify-between gap-4">
-                <span class="text-sm text-muted">Spots and route details available on the full page.</span>
+                <span class="text-sm text-muted">Los lugares y detalles de la ruta están disponibles en la página completa.</span>
                 <UButton :to="`/tour/${tour._id}`" color="primary" variant="soft" class="w-1/3 flex-shrink-0 justify-center">
-                    View details
+                    Ver detalles
                 </UButton>
             </div>
         </template>

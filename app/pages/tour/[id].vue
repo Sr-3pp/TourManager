@@ -12,7 +12,7 @@ const { data: tour, error } = await useAsyncData<Tour | null>(
 
 const formattedDate = computed(() => {
   if (!tour.value?.date) {
-    return 'Date to be announced'
+    return 'Fecha por confirmar'
   }
 
   const date = new Date(tour.value.date)
@@ -20,7 +20,7 @@ const formattedDate = computed(() => {
     return String(tour.value.date)
   }
 
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat('es-MX', {
     weekday: 'long',
     month: 'long',
     day: 'numeric',
@@ -31,7 +31,7 @@ const formattedDate = computed(() => {
 const formattedPrice = computed(() => {
   const price = Number(tour.value?.price ?? 0)
 
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('es-MX', {
     style: 'currency',
     currency: 'USD',
     maximumFractionDigits: 0,
@@ -42,14 +42,14 @@ const organizerName = computed(() => {
   const creator = tour.value?.creator
 
   if (!creator) {
-    return 'Organizer to be announced'
+    return 'Organizador por confirmar'
   }
 
   if (typeof creator === 'string') {
     return creator
   }
 
-  return creator.name || creator.slug || 'Organizer to be announced'
+  return creator.name || creator.slug || 'Organizador por confirmar'
 })
 
 const organizerLink = computed(() => {
@@ -74,7 +74,7 @@ function formatDepartureDate(value: string | Date) {
     return String(value)
   }
 
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat('es-MX', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -86,7 +86,7 @@ function formatDepartureDate(value: string | Date) {
 if (error.value) {
   throw createError({
     statusCode: error.value.statusCode || 500,
-    statusMessage: error.value.statusMessage || 'Failed to load tour',
+    statusMessage: error.value.statusMessage || 'No se pudo cargar el tour',
     fatal: true,
   })
 }
@@ -102,7 +102,7 @@ if (error.value) {
     <UContainer class="relative py-8 sm:py-10 lg:py-14">
       <NuxtLink to="/" class="mb-6 inline-flex items-center gap-2 text-sm font-medium text-primary hover:opacity-80">
         <UIcon name="i-lucide-arrow-left" />
-        Back to tours
+        Volver a los tours
       </NuxtLink>
 
       <div class="grid gap-8 lg:grid-cols-[minmax(0,1.35fr)_360px] lg:items-start">
@@ -112,7 +112,7 @@ if (error.value) {
               <NuxtImg
                 v-if="tour?.image"
                 :src="`/blob/${tour.image}`"
-                :alt="tour?.name || 'Tour image'"
+                :alt="tour?.name || 'Imagen del tour'"
                 class="h-72 w-full object-cover sm:h-96"
               />
               <div
@@ -120,7 +120,7 @@ if (error.value) {
                 class="flex h-72 w-full items-center justify-center bg-gradient-to-br from-primary via-secondary to-primary text-inverted sm:h-96"
               >
                 <div class="text-center">
-                  <p class="text-xs uppercase tracking-[0.35em] text-inverted/70">Featured Tour</p>
+                  <p class="text-xs uppercase tracking-[0.35em] text-inverted/70">Tour destacado</p>
                   <h1 class="mt-3 text-3xl font-bold sm:text-4xl">{{ tour?.name }}</h1>
                 </div>
               </div>
@@ -139,7 +139,7 @@ if (error.value) {
             <UCard>
               <div class="flex items-start justify-between gap-4">
                 <div>
-                  <p class="text-sm text-muted">Attendees</p>
+                  <p class="text-sm text-muted">Asistentes</p>
                   <p class="mt-2 text-3xl font-semibold">{{ attendeeCount }}</p>
                 </div>
                 <UIcon name="i-lucide-users" class="mt-1 text-2xl text-primary" />
@@ -148,7 +148,7 @@ if (error.value) {
             <UCard>
               <div class="flex items-start justify-between gap-4">
                 <div>
-                  <p class="text-sm text-muted">Sponsors</p>
+                  <p class="text-sm text-muted">Patrocinadores</p>
                   <p class="mt-2 text-3xl font-semibold">{{ sponsorCount }}</p>
                 </div>
                 <UIcon name="i-lucide-badge-dollar-sign" class="mt-1 text-2xl text-primary" />
@@ -157,7 +157,7 @@ if (error.value) {
             <UCard>
               <div class="flex items-start justify-between gap-4">
                 <div>
-                  <p class="text-sm text-muted">Packages</p>
+                  <p class="text-sm text-muted">Paquetes</p>
                   <p class="mt-2 text-3xl font-semibold">{{ packageCount }}</p>
                 </div>
                 <UIcon name="i-lucide-package" class="mt-1 text-2xl text-primary" />
@@ -166,7 +166,7 @@ if (error.value) {
             <UCard>
               <div class="flex items-start justify-between gap-4">
                 <div>
-                  <p class="text-sm text-muted">Departures</p>
+                  <p class="text-sm text-muted">Salidas</p>
                   <p class="mt-2 text-3xl font-semibold">{{ departureCount }}</p>
                 </div>
                 <UIcon name="i-lucide-map-pinned" class="mt-1 text-2xl text-primary" />
@@ -177,20 +177,20 @@ if (error.value) {
           <UCard class="rounded-3xl">
             <div class="space-y-6">
               <div>
-                <p class="text-sm font-medium uppercase tracking-[0.18em] text-primary">Overview</p>
+                <p class="text-sm font-medium uppercase tracking-[0.18em] text-primary">Resumen</p>
                 <h1 class="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">{{ tour?.name }}</h1>
                 <p class="mt-4 max-w-3xl text-base leading-7 text-muted">
-                  {{ tour?.description || 'Full event details are being prepared. Check back soon for the final itinerary and highlights.' }}
+                  {{ tour?.description || 'Se están preparando los detalles completos del evento. Vuelve pronto para ver el itinerario final y los aspectos destacados.' }}
                 </p>
               </div>
 
               <div class="grid gap-4 md:grid-cols-2">
                 <div class="rounded-2xl bg-muted/40 p-4">
-                  <p class="text-xs font-semibold uppercase tracking-[0.2em] text-muted">Location</p>
-                  <p class="mt-2 text-lg font-medium">{{ tour?.location || 'Location to be announced' }}</p>
+                  <p class="text-xs font-semibold uppercase tracking-[0.2em] text-muted">Ubicación</p>
+                  <p class="mt-2 text-lg font-medium">{{ tour?.location || 'Ubicación por confirmar' }}</p>
                 </div>
                 <div class="rounded-2xl bg-muted/40 p-4">
-                  <p class="text-xs font-semibold uppercase tracking-[0.2em] text-muted">Organizer</p>
+                  <p class="text-xs font-semibold uppercase tracking-[0.2em] text-muted">Organizador</p>
                   <NuxtLink
                     v-if="organizerLink"
                     :to="organizerLink"
@@ -208,10 +208,10 @@ if (error.value) {
             <UCard class="rounded-3xl">
               <div class="flex items-center justify-between gap-4">
                 <div>
-                  <p class="text-sm font-medium uppercase tracking-[0.18em] text-primary">Packages</p>
-                  <h2 class="mt-2 text-2xl font-semibold">What’s included</h2>
+                  <p class="text-sm font-medium uppercase tracking-[0.18em] text-primary">Paquetes</p>
+                  <h2 class="mt-2 text-2xl font-semibold">Qué incluye</h2>
                 </div>
-                <UBadge color="neutral" variant="soft">{{ packageCount }} options</UBadge>
+                <UBadge color="neutral" variant="soft">{{ packageCount }} opciones</UBadge>
               </div>
 
               <div v-if="tour?.packages?.length" class="mt-6 space-y-4">
@@ -226,7 +226,7 @@ if (error.value) {
                       <p class="text-sm text-muted">{{ pkg.description }}</p>
                     </div>
                     <UBadge color="primary" variant="soft">
-                      {{ new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(pkg.price) }}
+                      {{ new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(pkg.price) }}
                     </UBadge>
                   </div>
 
@@ -240,17 +240,17 @@ if (error.value) {
               </div>
 
               <div v-else class="mt-6 rounded-2xl border border-dashed border-default p-5 text-sm text-muted">
-                Package details have not been published yet.
+                Los detalles de los paquetes aún no se han publicado.
               </div>
             </UCard>
 
             <UCard class="rounded-3xl">
               <div class="flex items-center justify-between gap-4">
                 <div>
-                  <p class="text-sm font-medium uppercase tracking-[0.18em] text-primary">Departures</p>
-                  <h2 class="mt-2 text-2xl font-semibold">Pickup plan</h2>
+                  <p class="text-sm font-medium uppercase tracking-[0.18em] text-primary">Salidas</p>
+                  <h2 class="mt-2 text-2xl font-semibold">Plan de salida</h2>
                 </div>
-                <UBadge color="neutral" variant="soft">{{ departureCount }} stops</UBadge>
+                <UBadge color="neutral" variant="soft">{{ departureCount }} paradas</UBadge>
               </div>
 
               <div v-if="tour?.departure_points?.length" class="mt-6 space-y-4">
@@ -271,7 +271,7 @@ if (error.value) {
               </div>
 
               <div v-else class="mt-6 rounded-2xl border border-dashed border-default p-5 text-sm text-muted">
-                Departure points will be shared closer to the event date.
+                Los puntos de salida se compartirán más cerca de la fecha del evento.
               </div>
             </UCard>
           </div>
@@ -280,8 +280,8 @@ if (error.value) {
             <UCard class="rounded-3xl">
               <div class="flex items-center justify-between gap-4">
                 <div>
-                  <p class="text-sm font-medium uppercase tracking-[0.18em] text-primary">Attendees</p>
-                  <h2 class="mt-2 text-2xl font-semibold">Who’s coming</h2>
+                  <p class="text-sm font-medium uppercase tracking-[0.18em] text-primary">Asistentes</p>
+                  <h2 class="mt-2 text-2xl font-semibold">Quiénes vienen</h2>
                 </div>
                 <UBadge color="neutral" variant="soft">{{ attendeeCount }}</UBadge>
               </div>
@@ -305,15 +305,15 @@ if (error.value) {
               </div>
 
               <div v-else class="mt-6 rounded-2xl border border-dashed border-default p-5 text-sm text-muted">
-                No attendees have been added yet.
+                Aún no se han agregado asistentes.
               </div>
             </UCard>
 
             <UCard class="rounded-3xl">
               <div class="flex items-center justify-between gap-4">
                 <div>
-                  <p class="text-sm font-medium uppercase tracking-[0.18em] text-primary">Sponsors</p>
-                  <h2 class="mt-2 text-2xl font-semibold">Partners</h2>
+                  <p class="text-sm font-medium uppercase tracking-[0.18em] text-primary">Patrocinadores</p>
+                  <h2 class="mt-2 text-2xl font-semibold">Aliados</h2>
                 </div>
                 <UBadge color="neutral" variant="soft">{{ sponsorCount }}</UBadge>
               </div>
@@ -333,17 +333,17 @@ if (error.value) {
                       target="_blank"
                       class="mt-2 inline-flex text-sm text-primary hover:opacity-80"
                     >
-                      Visit website
+                      Visitar sitio web
                     </NuxtLink>
                   </div>
                   <div v-if="sponsor.logo" class="h-12 w-12 overflow-hidden rounded-xl border border-default">
-                    <NuxtImg :src="`/blob/${sponsor.logo}`" :alt="`${sponsor.name} logo`" class="h-full w-full object-cover" />
+                    <NuxtImg :src="`/blob/${sponsor.logo}`" :alt="`Logotipo de ${sponsor.name}`" class="h-full w-full object-cover" />
                   </div>
                 </div>
               </div>
 
               <div v-else class="mt-6 rounded-2xl border border-dashed border-default p-5 text-sm text-muted">
-                Sponsorship information has not been added yet.
+                Aún no se ha agregado la información de patrocinio.
               </div>
             </UCard>
           </div>
@@ -353,10 +353,10 @@ if (error.value) {
           <UCard class="rounded-3xl border-default shadow-sm">
             <div class="space-y-6">
               <div>
-                <p class="text-sm font-medium uppercase tracking-[0.18em] text-primary">Booking Summary</p>
+                <p class="text-sm font-medium uppercase tracking-[0.18em] text-primary">Resumen de reserva</p>
                 <p class="mt-3 text-4xl font-bold tracking-tight">{{ formattedPrice }}</p>
                 <p class="mt-2 text-sm leading-6 text-muted">
-                  Reserve your spot for <span class="font-medium text-primary">{{ formattedDate }}</span> in
+                  Reserva tu lugar para <span class="font-medium text-primary">{{ formattedDate }}</span> en
                   <span class="font-medium text-secondary">{{ tour?.location }}</span>.
                 </p>
               </div>
@@ -365,25 +365,25 @@ if (error.value) {
 
               <div class="space-y-4">
                 <div class="flex items-center justify-between text-sm">
-                  <span class="text-muted">Tour date</span>
+                  <span class="text-muted">Fecha del tour</span>
                   <span class="font-medium text-right">{{ formattedDate }}</span>
                 </div>
                 <div class="flex items-center justify-between text-sm">
-                  <span class="text-muted">Organizer</span>
+                  <span class="text-muted">Organizador</span>
                   <span class="font-medium text-right">{{ organizerName }}</span>
                 </div>
                 <div class="flex items-center justify-between text-sm">
-                  <span class="text-muted">Packages</span>
+                  <span class="text-muted">Paquetes</span>
                   <span class="font-medium">{{ packageCount }}</span>
                 </div>
                 <div class="flex items-center justify-between text-sm">
-                  <span class="text-muted">Departure points</span>
+                  <span class="text-muted">Puntos de salida</span>
                   <span class="font-medium">{{ departureCount }}</span>
                 </div>
               </div>
 
-              <UButton block size="xl">Reserve This Tour</UButton>
-              <UButton block size="xl" color="neutral" variant="soft">Contact Organizer</UButton>
+              <UButton block size="xl">Reservar este tour</UButton>
+              <UButton block size="xl" color="neutral" variant="soft">Contactar organizador</UButton>
             </div>
           </UCard>
         </aside>

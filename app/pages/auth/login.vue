@@ -13,15 +13,15 @@ const loginFields: AuthFormField[] = [
     {
         name: 'email',
         type: 'email',
-        label: 'Email',
-        placeholder: 'Enter your email',
+        label: 'Correo electrónico',
+        placeholder: 'Ingresa tu correo electrónico',
         required: true,
     },
     {
         name: 'password',
         type: 'password',
-        label: 'Password',
-        placeholder: 'Enter your password',
+        label: 'Contraseña',
+        placeholder: 'Ingresa tu contraseña',
         required: true,
     },
 ]
@@ -34,21 +34,21 @@ async function onSubmit(event: FormSubmitEvent<z.output<typeof loginSchema>>) {
         await fetchSession()
         await navigateTo('/profile')
     } catch (error) {
-        console.error('Error during login:', error)
+        console.error('Error durante el inicio de sesión:', error)
     }
 }
 </script>
 
 <template>
     <UContainer class="py-8">
-        <h1 class="text-2xl font-bold mb-4">Login</h1>
-        <p class="text-gray-600 mb-4">Sign in to your account.</p>
+        <h1 class="text-2xl font-bold mb-4">Iniciar sesión</h1>
+        <p class="text-gray-600 mb-4">Accede a tu cuenta.</p>
 
         <UAuthForm
             :schema="loginSchema"
             :fields="loginFields"
-            title="Welcome back"
-            description="Enter your credentials to continue."
+            title="Bienvenido de nuevo"
+            description="Ingresa tus credenciales para continuar."
             icon="i-lucide-user"
             class="max-w-md"
             @submit="onSubmit"

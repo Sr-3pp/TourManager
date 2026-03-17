@@ -16,27 +16,27 @@ const organizerId = computed(() => profile.value?.user ?? '')
 
 const tours = organizerId.value
     ? await getToursByOrganizer(organizerId.value).catch((err) => {
-        console.error('Error fetching tours for organizer:', err)
+        console.error('Error al cargar tours del organizador:', err)
         return []
     })
     : []
 </script>
 
 <template>
-    <ProfileShowcase :user="session?.user || null" :profile="profile ?? null" :tours="tours || []" tours-title="Your tours">
+    <ProfileShowcase :user="session?.user || null" :profile="profile ?? null" :tours="tours || []" tours-title="Tus tours">
         <template #actions>
-            <UButton @click="profileModal = true">Edit Profile</UButton>
-            <UButton color="secondary" variant="soft" @click="tourModal = true">Create Tour</UButton>
+            <UButton @click="profileModal = true">Editar perfil</UButton>
+            <UButton color="secondary" variant="soft" @click="tourModal = true">Crear tour</UButton>
         </template>
     </ProfileShowcase>
 
-    <UModal v-model:open="profileModal" title="Edit Profile">
+    <UModal v-model:open="profileModal" title="Editar perfil">
         <template #body>
             <ProfileForm />
         </template>
     </UModal>
 
-    <UModal v-model:open="tourModal" title="Create Tour">
+    <UModal v-model:open="tourModal" title="Crear tour">
         <template #body>
             <TourForm @saved="tourModal = false" />
         </template>

@@ -27,8 +27,8 @@ export const useProfile = () => {
 
             profile.value = data?.user?.profile
         } catch (error) {
-            console.error('Error loading profile:', error)
-            errorMessage.value = 'Could not load profile. Please sign in and try again.'
+            console.error('Error al cargar el perfil:', error)
+            errorMessage.value = 'No se pudo cargar el perfil. Inicia sesión e inténtalo de nuevo.'
         } finally {
             isLoading.value = false
         }
@@ -64,12 +64,12 @@ export const useProfile = () => {
             })
 
             await loadProfile({ force: true })
-            successMessage.value = 'Profile updated successfully.'
+            successMessage.value = 'Perfil actualizado correctamente.'
             return true
         } catch (error) {
-            console.error('Error saving profile:', error)
+            console.error('Error al guardar el perfil:', error)
             errorMessage.value =
-                error instanceof Error ? error.message : 'Could not save profile. Please try again.'
+                error instanceof Error ? error.message : 'No se pudo guardar el perfil. Inténtalo de nuevo.'
             return false
         } finally {
             isSaving.value = false

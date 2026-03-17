@@ -21,14 +21,14 @@ const { data, error, status } = await useAsyncData<OrganizerResponse>(
         throw err
       }),
       getToursByOrganizer(slug.value).catch((err) => {
-        console.error('Error fetching tours for organizer:', err)
+        console.error('Error al cargar tours del organizador:', err)
         return []
       }),
     ])
     if (!organizerData) {
       throw createError({
         statusCode: 404,
-        statusMessage: 'Organizer not found',
+        statusMessage: 'Organizador no encontrado',
         fatal: true,
       })
     }
@@ -44,12 +44,12 @@ const tours = computed(() => data.value?.tours || [])
 if (error.value || (status.value === 'success' && !organizer.value)) {
   throw createError({
     statusCode: 404,
-    statusMessage: 'Organizer not found',
+    statusMessage: 'Organizador no encontrado',
     fatal: true,
   })
 }
 </script>
 
 <template>
-    <ProfileShowcase :user="organizer" :profile="organizerProfile" :tours="tours" tours-title="Organizer tours" />
+    <ProfileShowcase :user="organizer" :profile="organizerProfile" :tours="tours" tours-title="Tours del organizador" />
 </template>

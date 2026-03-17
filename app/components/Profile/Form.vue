@@ -6,7 +6,7 @@ import type { OrganizerProfileFormState, Profile } from '~~/types/profile'
 const MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024
 
 const organizerProfileSchema = z.object({
-    bio: z.string().max(500, 'Bio is too long').optional().default(''),
+    bio: z.string().max(500, 'La biografía es demasiado larga').optional().default(''),
     instagram: z.string().max(100).optional().default(''),
     tiktok: z.string().max(100).optional().default(''),
     x: z.string().max(100).optional().default(''),
@@ -84,7 +84,7 @@ function onPictureChange(event: Event) {
     }
 
     if (file.size > MAX_UPLOAD_SIZE_BYTES) {
-        errorMessage.value = 'Profile picture must be less than 10MB (it will be compressed automatically).'
+        errorMessage.value = 'La foto de perfil debe pesar menos de 10 MB (se comprimirá automáticamente).'
         pictureFile.value = null
         target.value = ''
         return
@@ -103,7 +103,7 @@ function onBannerChange(event: Event) {
     }
 
     if (file.size > MAX_UPLOAD_SIZE_BYTES) {
-        errorMessage.value = 'Banner image must be less than 10MB (it will be compressed automatically).'
+        errorMessage.value = 'La imagen del banner debe pesar menos de 10 MB (se comprimirá automáticamente).'
         bannerFile.value = null
         target.value = ''
         return
@@ -137,8 +137,8 @@ onMounted(() => syncDraft())
 <template>
     <div class="max-w-2xl space-y-4">
         <div class="space-y-1">
-            <h2 class="text-xl font-semibold">Organizer Profile</h2>
-            <p class="text-sm text-gray-600">Update your public organizer profile details.</p>
+            <h2 class="text-xl font-semibold">Perfil del organizador</h2>
+            <p class="text-sm text-gray-600">Actualiza los detalles públicos de tu perfil de organizador.</p>
         </div>
 
         <UAlert
@@ -161,62 +161,62 @@ onMounted(() => syncDraft())
             class="space-y-4"
             @submit="onSubmit"
         >
-            <UFormField name="bio" label="Bio">
-                <UTextarea v-model="draft.bio" :rows="4" placeholder="Tell people about your work..." />
+            <UFormField name="bio" label="Biografía">
+                <UTextarea v-model="draft.bio" :rows="4" placeholder="Cuéntale a la gente sobre tu trabajo..." />
             </UFormField>
 
-            <UFormField name="picture" label="Profile Picture (max 10MB)">
+            <UFormField name="picture" label="Foto de perfil (máx. 10 MB)">
                 <UInput type="file" accept="image/*" @change="onPictureChange" />
                 <div class="mt-2">
                     <img
                         v-if="picturePreviewUrl"
                         :src="picturePreviewUrl"
-                        alt="New profile picture preview"
+                        alt="Vista previa de la nueva foto de perfil"
                         class="h-24 w-24 rounded-full border object-cover"
                     >
                     <img
                         v-else-if="profile?.picture"
                         :src="`/blob/${profile.picture}`"
-                        alt="Current profile picture"
+                        alt="Foto de perfil actual"
                         class="h-24 w-24 rounded-full border object-cover"
                     >
                 </div>
             </UFormField>
 
-            <UFormField name="banner" label="Banner (max 10MB)">
+            <UFormField name="banner" label="Banner (máx. 10 MB)">
                 <UInput type="file" accept="image/*" @change="onBannerChange" />
                 <div class="mt-2">
                     <img
                         v-if="bannerPreviewUrl"
                         :src="bannerPreviewUrl"
-                        alt="New banner preview"
+                        alt="Vista previa del nuevo banner"
                         class="h-24 w-full rounded-md border object-cover"
                     >
                     <img
                         v-else-if="profile?.banner"
                         :src="`/blob/${profile.banner}`"
-                        alt="Current banner"
+                        alt="Banner actual"
                         class="h-24 w-full rounded-md border object-cover"
                     >
                 </div>
             </UFormField>
 
             <UFormField name="instagram" label="Instagram">
-                <UInput v-model="draft.instagram" placeholder="@yourhandle" />
+                <UInput v-model="draft.instagram" placeholder="@tuusuario" />
             </UFormField>
 
             <UFormField name="x" label="X">
-                <UInput v-model="draft.x" placeholder="@yourhandle" />
+                <UInput v-model="draft.x" placeholder="@tuusuario" />
             </UFormField>
 
             <UFormField name="tiktok" label="TikTok">
-                <UInput v-model="draft.tiktok" placeholder="@yourhandle" />
+                <UInput v-model="draft.tiktok" placeholder="@tuusuario" />
             </UFormField>
 
             <div class="flex gap-3">
-                <UButton type="submit" :loading="isSaving" :disabled="isLoading">Save Profile</UButton>
+                <UButton type="submit" :loading="isSaving" :disabled="isLoading">Guardar perfil</UButton>
                 <UButton type="button" color="neutral" variant="soft" :disabled="isSaving" @click="() => syncDraft()">
-                    Reload
+                    Recargar
                 </UButton>
             </div>
         </UForm>

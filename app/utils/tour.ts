@@ -1,6 +1,6 @@
 import type { Tour } from '~~/types/tour'
 
-const DEFAULT_LOCALE = 'en-US'
+const DEFAULT_LOCALE = 'es-MX'
 
 export function formatTourPrice(value: number | null | undefined, options?: Intl.NumberFormatOptions) {
   const price = Number(value ?? 0)
@@ -15,7 +15,7 @@ export function formatTourPrice(value: number | null | undefined, options?: Intl
 
 export function formatTourDate(
   value: string | Date | null | undefined,
-  fallback = 'Date to be announced',
+  fallback = 'Fecha por confirmar',
   options?: Intl.DateTimeFormatOptions,
 ) {
   if (!value) {
@@ -40,12 +40,12 @@ export function getTourOrganizerName(tour: Pick<Tour, 'creator'> | null | undefi
   const creator = tour?.creator
 
   if (!creator) {
-    return 'Organizer to be announced'
+    return 'Organizador por confirmar'
   }
 
   if (typeof creator === 'string') {
     return creator
   }
 
-  return creator.name || creator.slug || 'Organizer to be announced'
+  return creator.name || creator.slug || 'Organizador por confirmar'
 }

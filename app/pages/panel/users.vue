@@ -22,25 +22,25 @@ const selectedUser = ref<AdminUser | null>(null)
 const columns: TableColumn<AdminUser>[] = [
     {
         accessorKey: 'name',
-        header: 'Name',
+        header: 'Nombre',
     },
     {
         accessorKey: 'email',
-        header: 'Email',
+        header: 'Correo electrónico',
     },
     {
         accessorKey: 'level',
-        header: 'Level',
+        header: 'Nivel',
         cell: ({ row }) => String(row.original.level ?? 1),
     },
     {
         id: 'featured',
-        header: 'Featured organizer',
-        cell: ({ row }) => row.original.profile?.featured ? 'Yes' : 'No',
+        header: 'Organizador destacado',
+        cell: ({ row }) => row.original.profile?.featured ? 'Sí' : 'No',
     },
     {
         id: 'actions',
-        header: 'Actions',
+        header: 'Acciones',
     },
 ]
 
@@ -69,9 +69,9 @@ async function removeUser(user: AdminUser) {
     const userId = getUserId(user)
 
     await openConfirmation({
-        title: `Delete ${user.name}?`,
-        description: 'This action cannot be undone. The user account, profile, session, and auth records will be removed.',
-        confirmLabel: 'Delete User',
+        title: `¿Eliminar a ${user.name}?`,
+        description: 'Esta acción no se puede deshacer. Se eliminarán la cuenta, el perfil, la sesión y los registros de autenticación del usuario.',
+        confirmLabel: 'Eliminar usuario',
         color: 'error',
         icon: 'i-lucide-triangle-alert',
         onConfirm: async () => {
@@ -90,8 +90,8 @@ async function removeUser(user: AdminUser) {
 
 <template>
     <UContainer class="p-4">
-        <h1 class="text-2xl font-bold mb-4">Users</h1>
-        <p class="mb-4 text-gray-600">This page displays the registered users.</p>
+        <h1 class="text-2xl font-bold mb-4">Usuarios</h1>
+        <p class="mb-4 text-gray-600">Esta página muestra los usuarios registrados.</p>
 
         <UTable
             :data="usersList"
@@ -108,7 +108,7 @@ async function removeUser(user: AdminUser) {
                         icon="i-lucide-pencil"
                         @click="openEditModal(row.original)"
                     >
-                        Edit
+                        Editar
                     </UButton>
                     <UButton
                         size="sm"
@@ -118,18 +118,18 @@ async function removeUser(user: AdminUser) {
                         :loading="deletingUserId === getUserId(row.original)"
                         @click="removeUser(row.original)"
                     >
-                        Delete
+                        Eliminar
                     </UButton>
                 </div>
             </template>
         </UTable>
 
         <p v-if="error" class="mt-4 text-sm text-error">
-            Failed to load users.
+            No se pudieron cargar los usuarios.
         </p>
     </UContainer>
 
-    <UModal v-model:open="isEditModalOpen" title="Edit User">
+    <UModal v-model:open="isEditModalOpen" title="Editar usuario">
         <template #body>
             <UserEditForm
                 v-if="selectedUser"

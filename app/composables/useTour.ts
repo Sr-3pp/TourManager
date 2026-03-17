@@ -43,8 +43,8 @@ export const useTour = () => {
 
       return tours.value
     } catch (error) {
-      console.error('Error loading tours:', error)
-      errorMessage.value = 'Could not load tours.'
+      console.error('Error al cargar tours:', error)
+      errorMessage.value = 'No se pudieron cargar los tours.'
       throw error
     }
   }
@@ -71,8 +71,8 @@ export const useTour = () => {
 
       return featuredTours.value
     } catch (error) {
-      console.error('Error loading featured tours:', error)
-      errorMessage.value = 'Could not load featured tours.'
+      console.error('Error al cargar tours destacados:', error)
+      errorMessage.value = 'No se pudieron cargar los tours destacados.'
       throw error
     }
   }
@@ -81,7 +81,7 @@ export const useTour = () => {
     const force = options?.force ?? false
 
     if (!id) {
-      errorMessage.value = 'Tour id is required.'
+      errorMessage.value = 'El id del tour es obligatorio.'
       return null
     }
 
@@ -102,8 +102,8 @@ export const useTour = () => {
       toursById.value[id] = data.tour
       return toursById.value[id]
     } catch (error) {
-      console.error('Error loading tour:', error)
-      errorMessage.value = 'Could not load tour.'
+      console.error('Error al cargar el tour:', error)
+      errorMessage.value = 'No se pudo cargar el tour.'
       return null
     } finally {
       isLoading.value = false
@@ -188,11 +188,11 @@ export const useTour = () => {
         organizerTours.value = {}
       }
 
-      successMessage.value = hasId ? 'Tour updated successfully.' : 'Tour created successfully.'
+      successMessage.value = hasId ? 'Tour actualizado correctamente.' : 'Tour creado correctamente.'
       return true
     } catch (error) {
-      console.error('Error saving tour:', error)
-      errorMessage.value = error instanceof Error ? error.message : 'Could not save tour.'
+      console.error('Error al guardar el tour:', error)
+      errorMessage.value = error instanceof Error ? error.message : 'No se pudo guardar el tour.'
       return false
     } finally {
       isSaving.value = false
@@ -247,7 +247,7 @@ export const useTour = () => {
 
       return organizerTours.value[organizerId]
     } catch (error) {
-      console.error('Error fetching tours by organizer:', error)
+      console.error('Error al obtener los tours del organizador:', error)
       return []
     }
   }

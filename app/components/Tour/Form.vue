@@ -6,27 +6,27 @@ import type { Tour, TourFormInitialValues, TourFormState } from '~~/types/tour'
 const MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024
 
 const tourSchema = z.object({
-	name: z.string().min(2, 'Tour name is required').max(120),
+	name: z.string().min(2, 'El nombre del tour es obligatorio').max(120),
 	description: z.string().max(2000).optional().default(''),
 	location: z.string().max(200).optional().default(''),
-	date: z.string().min(1, 'Tour date is required'),
+	date: z.string().min(1, 'La fecha del tour es obligatoria'),
 	packages: z
 		.array(
 			z.object({
 				level: z.number().min(1),
-				name: z.string().min(1, 'Package name is required'),
+				name: z.string().min(1, 'El nombre del paquete es obligatorio'),
 				description: z.string().optional().default(''),
 				price: z.number().min(0),
-				benefits: z.array(z.string().min(1, 'Benefit is required')).default([]),
+				benefits: z.array(z.string().min(1, 'El beneficio es obligatorio')).default([]),
 			}),
 		)
 		.default([]),
 	departure_points: z
 		.array(
 			z.object({
-				name: z.string().min(1, 'Departure point name is required'),
+				name: z.string().min(1, 'El nombre del punto de salida es obligatorio'),
 				location: z.string().optional().default(''),
-				dateTime: z.string().min(1, 'Departure time is required'),
+				dateTime: z.string().min(1, 'La hora de salida es obligatoria'),
 				notes: z.string().optional().default(''),
 			}),
 		)
@@ -176,7 +176,7 @@ function onImageChange(event: Event) {
 	}
 
 	if (file.size > MAX_UPLOAD_SIZE_BYTES) {
-		localErrorMessage.value = 'Tour image must be less than 10MB.'
+		localErrorMessage.value = 'La imagen del tour debe pesar menos de 10 MB.'
 		imageFile.value = null
 		target.value = ''
 		return
@@ -228,8 +228,8 @@ onMounted(async () => {
 <template>
 	<div class="max-w-2xl space-y-4">
 		<div class="space-y-1">
-			<h2 class="text-xl font-semibold">{{ props.tourId ? 'Edit Tour' : 'Create Tour' }}</h2>
-			<p class="text-sm text-gray-600">Create or update your tour details.</p>
+			<h2 class="text-xl font-semibold">{{ props.tourId ? 'Editar tour' : 'Crear tour' }}</h2>
+			<p class="text-sm text-gray-600">Crea o actualiza los detalles de tu tour.</p>
 		</div>
 
 		<UAlert
@@ -247,35 +247,35 @@ onMounted(async () => {
 		/>
 
 		<UForm :schema="tourSchema" :state="draft" class="space-y-4" @submit="onSubmit">
-			<UFormField name="name" label="Tour Name">
-				<UInput v-model="draft.name" placeholder="Amazing Andes Adventure" />
+			<UFormField name="name" label="Nombre del tour">
+				<UInput v-model="draft.name" placeholder="Aventura increíble por los Andes" />
 			</UFormField>
 
-			<UFormField name="description" label="Description">
-				<UTextarea v-model="draft.description" :rows="4" placeholder="Describe the experience..." />
+			<UFormField name="description" label="Descripción">
+				<UTextarea v-model="draft.description" :rows="4" placeholder="Describe la experiencia..." />
 			</UFormField>
 
-			<UFormField name="location" label="Location">
+			<UFormField name="location" label="Ubicación">
 				<UInput v-model="draft.location" placeholder="Cusco, Peru" />
 			</UFormField>
 
-			<UFormField name="date" label="Tour Date">
+			<UFormField name="date" label="Fecha del tour">
 				<UInput v-model="draft.date" type="datetime-local" />
 			</UFormField>
 
-			<UFormField name="image" label="Tour Image (max 10MB)">
+			<UFormField name="image" label="Imagen del tour (máx. 10 MB)">
 				<UInput type="file" accept="image/*" @change="onImageChange" />
 				<div class="mt-2">
 					<img
 						v-if="imagePreviewUrl"
 						:src="imagePreviewUrl"
-						alt="New tour image preview"
+						alt="Vista previa de la nueva imagen del tour"
 						class="h-24 w-full rounded-md border object-cover"
 					>
 					<img
 						v-else-if="currentImageUrl"
 						:src="currentImageUrl"
-						alt="Current tour image"
+						alt="Imagen actual del tour"
 						class="h-24 w-full rounded-md border object-cover"
 					>
 				</div>
@@ -284,29 +284,29 @@ onMounted(async () => {
 
 			<div class="space-y-3 rounded-md border p-4">
 				<div class="flex items-center justify-between">
-					<h3 class="text-sm font-semibold">Packages</h3>
-					<UButton type="button" size="sm" variant="soft" @click="addPackage">Add Package</UButton>
+					<h3 class="text-sm font-semibold">Paquetes</h3>
+					<UButton type="button" size="sm" variant="soft" @click="addPackage">Agregar paquete</UButton>
 				</div>
 
 				<div v-for="(pkg, packageIndex) in draft.packages" :key="`package-${packageIndex}`" class="space-y-3 rounded-md border p-3">
 					<div class="flex justify-end">
-						<UButton type="button" size="xs" color="error" variant="ghost" @click="removePackage(packageIndex)">Remove</UButton>
+						<UButton type="button" size="xs" color="error" variant="ghost" @click="removePackage(packageIndex)">Eliminar</UButton>
 					</div>
 					<div class="grid gap-2 md:grid-cols-3">
-						<UInput v-model.number="pkg.level" type="number" min="1" placeholder="Level" />
-						<UInput v-model="pkg.name" placeholder="Package name" />
-						<UInput v-model.number="pkg.price" type="number" min="0" step="0.01" placeholder="Price" />
+						<UInput v-model.number="pkg.level" type="number" min="1" placeholder="Nivel" />
+						<UInput v-model="pkg.name" placeholder="Nombre del paquete" />
+						<UInput v-model.number="pkg.price" type="number" min="0" step="0.01" placeholder="Precio" />
 					</div>
-					<UTextarea v-model="pkg.description" :rows="2" placeholder="Package description" />
+					<UTextarea v-model="pkg.description" :rows="2" placeholder="Descripción del paquete" />
 
 					<div class="space-y-2">
 						<div class="flex items-center justify-between">
-							<p class="text-xs font-medium">Benefits</p>
-							<UButton type="button" size="xs" variant="soft" @click="addBenefit(packageIndex)">Add Benefit</UButton>
+							<p class="text-xs font-medium">Beneficios</p>
+							<UButton type="button" size="xs" variant="soft" @click="addBenefit(packageIndex)">Agregar beneficio</UButton>
 						</div>
 						<div v-for="(benefit, benefitIndex) in pkg.benefits" :key="`benefit-${packageIndex}-${benefitIndex}`" class="flex gap-2">
-							<UInput v-model="pkg.benefits[benefitIndex]" placeholder="Benefit" class="flex-1" />
-							<UButton type="button" size="xs" color="error" variant="ghost" @click="removeBenefit(packageIndex, benefitIndex)">Remove</UButton>
+							<UInput v-model="pkg.benefits[benefitIndex]" placeholder="Beneficio" class="flex-1" />
+							<UButton type="button" size="xs" color="error" variant="ghost" @click="removeBenefit(packageIndex, benefitIndex)">Eliminar</UButton>
 						</div>
 					</div>
 				</div>
@@ -314,27 +314,27 @@ onMounted(async () => {
 
 			<div class="space-y-3 rounded-md border p-4">
 				<div class="flex items-center justify-between">
-					<h3 class="text-sm font-semibold">Departure Points</h3>
-					<UButton type="button" size="sm" variant="soft" @click="addDeparturePoint">Add Departure</UButton>
+					<h3 class="text-sm font-semibold">Puntos de salida</h3>
+					<UButton type="button" size="sm" variant="soft" @click="addDeparturePoint">Agregar salida</UButton>
 				</div>
 
 				<div v-for="(point, pointIndex) in draft.departure_points" :key="`departure-${pointIndex}`" class="space-y-3 rounded-md border p-3">
 					<div class="flex justify-end">
-						<UButton type="button" size="xs" color="error" variant="ghost" @click="removeDeparturePoint(pointIndex)">Remove</UButton>
+						<UButton type="button" size="xs" color="error" variant="ghost" @click="removeDeparturePoint(pointIndex)">Eliminar</UButton>
 					</div>
 					<div class="grid gap-2 md:grid-cols-2">
-						<UInput v-model="point.name" placeholder="Departure name" />
-						<UInput v-model="point.location" placeholder="Departure location" />
+						<UInput v-model="point.name" placeholder="Nombre de la salida" />
+						<UInput v-model="point.location" placeholder="Ubicación de la salida" />
 					</div>
 					<UInput v-model="point.dateTime" type="datetime-local" />
-					<UTextarea v-model="point.notes" :rows="2" placeholder="Notes" />
+					<UTextarea v-model="point.notes" :rows="2" placeholder="Notas" />
 				</div>
 			</div>
 
 			<div class="flex gap-3">
-				<UButton type="submit" :loading="isSaving">{{ props.tourId ? 'Update Tour' : 'Create Tour' }}</UButton>
+				<UButton type="submit" :loading="isSaving">{{ props.tourId ? 'Actualizar tour' : 'Crear tour' }}</UButton>
 				<UButton type="button" color="neutral" variant="soft" :disabled="isSaving || isLoading" @click="reloadForm">
-					Reload
+					Recargar
 				</UButton>
 			</div>
 		</UForm>

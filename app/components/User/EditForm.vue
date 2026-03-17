@@ -15,8 +15,8 @@ const emit = defineEmits<{
 const { updateUser } = useUser()
 
 const schema = z.object({
-  name: z.string().trim().min(1, 'Name is required'),
-  email: z.string().email('Email is invalid'),
+  name: z.string().trim().min(1, 'El nombre es obligatorio'),
+  email: z.string().email('El correo electrónico no es válido'),
   level: z.number().int().min(1).max(3),
   password: z.string(),
   confirmPassword: z.string(),
@@ -30,7 +30,7 @@ const schema = z.object({
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       path: ['password'],
-      message: 'Password must be at least 8 characters',
+      message: 'La contraseña debe tener al menos 8 caracteres',
     })
   }
 
@@ -38,7 +38,7 @@ const schema = z.object({
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       path: ['password'],
-      message: 'Password must be at most 128 characters',
+      message: 'La contraseña debe tener como máximo 128 caracteres',
     })
   }
 
@@ -46,7 +46,7 @@ const schema = z.object({
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       path: ['confirmPassword'],
-      message: 'Password confirmation does not match',
+      message: 'La confirmación de contraseña no coincide',
     })
   }
 })
@@ -107,7 +107,7 @@ function getErrorMessage(error: unknown) {
     return error.message
   }
 
-  return 'Failed to update user.'
+  return 'No se pudo actualizar el usuario.'
 }
 
 watch(
@@ -158,36 +158,36 @@ async function onSubmit(event: FormSubmitEvent<UserEditFormState>) {
     />
 
     <UForm :schema="schema" :state="form" class="space-y-4" @submit="onSubmit">
-      <UFormField name="name" label="Name">
+      <UFormField name="name" label="Nombre">
         <UInput v-model="form.name" />
       </UFormField>
 
-      <UFormField name="email" label="Email">
+      <UFormField name="email" label="Correo electrónico">
         <UInput v-model="form.email" type="email" />
       </UFormField>
 
-      <UFormField name="level" label="Level">
+      <UFormField name="level" label="Nivel">
         <UInputNumber v-model="form.level" :min="1" :max="3" />
       </UFormField>
 
-      <UFormField name="password" label="New Password">
-        <UInput v-model="form.password" type="password" placeholder="Leave blank to keep current password" />
+      <UFormField name="password" label="Nueva contraseña">
+        <UInput v-model="form.password" type="password" placeholder="Déjalo en blanco para conservar la contraseña actual" />
       </UFormField>
 
-      <UFormField name="confirmPassword" label="Confirm New Password">
-        <UInput v-model="form.confirmPassword" type="password" placeholder="Repeat the new password" />
+      <UFormField name="confirmPassword" label="Confirmar nueva contraseña">
+        <UInput v-model="form.confirmPassword" type="password" placeholder="Repite la nueva contraseña" />
       </UFormField>
 
-      <UFormField name="bio" label="Bio">
+      <UFormField name="bio" label="Biografía">
         <UTextarea v-model="form.bio" :rows="4" />
       </UFormField>
 
       <UFormField
         name="featured"
-        label="Featured organizer"
-        description="Enable this only after the organizer has paid for homepage placement."
+        label="Organizador destacado"
+        description="Activa esto solo después de que el organizador haya pagado por aparecer en la portada."
       >
-        <UCheckbox v-model="form.featured" label="Show this organizer in the featured organizers section" />
+        <UCheckbox v-model="form.featured" label="Mostrar este organizador en la sección de organizadores destacados" />
       </UFormField>
 
       <UFormField name="instagram" label="Instagram">
@@ -204,10 +204,10 @@ async function onSubmit(event: FormSubmitEvent<UserEditFormState>) {
 
       <div class="flex justify-end gap-2">
         <UButton type="button" color="neutral" variant="soft" @click="emit('cancel')">
-          Cancel
+          Cancelar
         </UButton>
         <UButton type="submit" :loading="isSaving">
-          Save
+          Guardar
         </UButton>
       </div>
     </UForm>
