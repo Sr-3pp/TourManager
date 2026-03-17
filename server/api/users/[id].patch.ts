@@ -78,6 +78,17 @@ function normalizePassword(value: unknown) {
   return value
 }
 
+function normalizeBoolean(value: unknown, field: string) {
+  if (typeof value !== 'boolean') {
+    throw createError({
+      statusCode: 400,
+      statusMessage: `${field} must be a boolean`,
+    })
+  }
+
+  return value
+}
+
 export default defineEventHandler(async (event) => {
   await requireUserLevel(event, 3)
   await dbConnect()
@@ -93,7 +104,7 @@ export default defineEventHandler(async (event) => {
 
   const body = (await readBody<AdminUserUpdateBody>(event)) ?? {}
   const userUpdate: Record<string, string | number> = {}
-  const profileUpdate: Record<string, string> = {}
+  const profileUpdate: Record<string, string | boolean> = {}
   let password: string | undefined
 
   if ('name' in body && body.name !== undefined) {
@@ -122,6 +133,10 @@ export default defineEventHandler(async (event) => {
 
     if ('bio' in body.profile && body.profile.bio !== undefined) {
       profileUpdate.bio = normalizeOptionalString(body.profile.bio, 'profile.bio')
+    }
+
+    if ('featured' in body.profile && body.profile.featured !== undefined) {
+      profileUpdate.featured = normalizeBoolean(body.profile.featured, 'profile.featured')
     }
 
     if (body.profile.social) {

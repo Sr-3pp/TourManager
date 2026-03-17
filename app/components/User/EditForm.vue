@@ -21,6 +21,7 @@ const schema = z.object({
   password: z.string(),
   confirmPassword: z.string(),
   bio: z.string(),
+  featured: z.boolean(),
   instagram: z.string(),
   x: z.string(),
   tiktok: z.string(),
@@ -60,6 +61,7 @@ const form = reactive<UserEditFormState>({
   password: '',
   confirmPassword: '',
   bio: '',
+  featured: false,
   instagram: '',
   x: '',
   tiktok: '',
@@ -73,6 +75,7 @@ function syncForm(user: AdminUser) {
   form.password = ''
   form.confirmPassword = ''
   form.bio = user.profile?.bio ?? ''
+  form.featured = user.profile?.featured ?? false
   form.instagram = user.profile?.social?.instagram ?? ''
   form.x = user.profile?.social?.x ?? ''
   form.tiktok = user.profile?.social?.tiktok ?? ''
@@ -127,6 +130,7 @@ async function onSubmit(event: FormSubmitEvent<UserEditFormState>) {
       password: event.data.password || undefined,
       profile: {
         bio: event.data.bio,
+        featured: event.data.featured,
         social: {
           instagram: event.data.instagram,
           x: event.data.x,
@@ -176,6 +180,14 @@ async function onSubmit(event: FormSubmitEvent<UserEditFormState>) {
 
       <UFormField name="bio" label="Bio">
         <UTextarea v-model="form.bio" :rows="4" />
+      </UFormField>
+
+      <UFormField
+        name="featured"
+        label="Featured organizer"
+        description="Enable this only after the organizer has paid for homepage placement."
+      >
+        <UCheckbox v-model="form.featured" label="Show this organizer in the featured organizers section" />
       </UFormField>
 
       <UFormField name="instagram" label="Instagram">

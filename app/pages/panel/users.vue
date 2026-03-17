@@ -34,6 +34,11 @@ const columns: TableColumn<AdminUser>[] = [
         cell: ({ row }) => String(row.original.level ?? 1),
     },
     {
+        id: 'featured',
+        header: 'Featured organizer',
+        cell: ({ row }) => row.original.profile?.featured ? 'Yes' : 'No',
+    },
+    {
         id: 'actions',
         header: 'Actions',
     },

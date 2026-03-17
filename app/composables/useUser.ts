@@ -1,6 +1,9 @@
+import type { FeaturedOrganizer, FeaturedOrganizerListResponse } from '~~/types/profile'
 import type { AdminUser, AdminUserUpdateBody } from '~~/types/user'
 
 export const useUser = () => {
+    const featuredOrganizers = useState<FeaturedOrganizer[]>('user-featured-organizers', () => [])
+
     const getUsers = () => {
       const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
 
@@ -25,9 +28,26 @@ export const useUser = () => {
       })
     }
 
+    const loadFeaturedOrganizers = async (options?: { force?: boolean }) => {
+      const force = options?.force ?? false
+
+      if (!force && featuredOrganizers.value.length > 0) {
+        return featuredOrganizers.value
+      }
+
+      const data = await $fetch<FeaturedOrganizerListResponse>('/api/users/featured-organizers', {
+        credentials: 'include',
+      })
+
+      featuredOrganizers.value = data.organizers
+      return featuredOrganizers.value
+    }
+
   return {
+    featuredOrganizers,
     getUsers,
     deleteUser,
+    loadFeaturedOrganizers,
     updateUser,
   }
 }

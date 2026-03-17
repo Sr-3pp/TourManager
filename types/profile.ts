@@ -18,9 +18,19 @@ export type ProfileUser = {
 export type Profile = {
 	banner: string | null
 	bio: string
+	featured?: boolean
 	picture: string | null
 	social: ProfileSocial
 	user: string
+}
+
+export type FeaturedOrganizer = {
+	profile: Profile
+	toursCount: number
+	user: {
+		name?: string
+		slug?: string
+	}
 }
 
 export type OrganizerProfileFormState = {
@@ -39,6 +49,10 @@ export type MeResponse = {
 export type OrganizerResponse = {
 	user: OrganizerUser
 	tours: import('~~/types/tour').Tour[]
+}
+
+export type FeaturedOrganizerListResponse = {
+	organizers: FeaturedOrganizer[]
 }
 
 export type ProfileUpdateBody = {

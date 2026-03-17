@@ -1,5 +1,6 @@
 export type AdminUserProfile = {
   bio?: string
+  featured?: boolean
   social?: {
     instagram?: string
     x?: string
@@ -31,6 +32,7 @@ export type UserEditFormState = {
   password: string
   confirmPassword: string
   bio: string
+  featured: boolean
   instagram: string
   x: string
   tiktok: string
