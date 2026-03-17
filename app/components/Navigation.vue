@@ -14,37 +14,42 @@ const navItems = computed(() => {
       icon: 'i-lucide-compass',
       visible: true,
     },
-    {
-      label: 'Users',
-      to: '/panel/users',
-      icon: 'i-lucide-users',
-      visible: Boolean(user.value),
-    },
   ]
 
   return items.filter(item => item.visible)
 })
 
-const userMenuItems = computed(() => [
-  [
+const userMenuItems = computed(() => {
+  const accountItems = [
     {
       label: 'Profile',
       icon: 'i-lucide-user-round',
       to: '/profile',
     },
-  ],
-  [
-    {
-      label: 'Logout',
-      icon: 'i-lucide-log-out',
-      color: 'error',
-      onSelect: async () => {
-        await logoutUser()
-        await navigateTo('/auth/login')
+  ]
+
+  if (user.value?.level === 3) {
+    accountItems.push({
+      label: 'Panel',
+      icon: 'i-lucide-layout-panel-left',
+      to: '/panel',
+    })
+  }
+
+  return [
+    accountItems,
+    [
+      {
+        label: 'Logout',
+        icon: 'i-lucide-log-out',
+        onSelect: async () => {
+          await logoutUser()
+          await navigateTo('/auth/login')
+        },
       },
-    },
-  ],
-])
+    ],
+  ]
+})
 
 function isActive(path: string) {
   if (path === '/') {
@@ -70,12 +75,6 @@ function isActive(path: string) {
               <p class="truncate text-xs uppercase tracking-[0.24em] text-muted">Plan. Publish. Host.</p>
             </div>
           </NuxtLink>
-
-          <div
-            class="hidden rounded-full border border-default bg-secondary/10 px-3 py-2 text-xs font-medium text-secondary sm:inline-flex"
-          >
-            {{ user ? `Signed in as ${user.name}` : 'Guest mode' }}
-          </div>
         </div>
 
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between lg:justify-end">

@@ -3,5 +3,6 @@
     <NuxtRouteAnnouncer />
     <Navigation />
     <NuxtPage />
+    <ConfirmationModal />
   </div>
 </template>

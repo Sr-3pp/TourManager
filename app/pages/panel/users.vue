@@ -7,6 +7,7 @@ definePageMeta({
 })
 
 const { getUsers, deleteUser } = useUser()
+const { openConfirmation } = useConfirmation()
 
 const loadUsers = async (): Promise<AdminUser[]> => {
     return await getUsers()
@@ -17,7 +18,6 @@ const usersList = computed<AdminUser[]>(() => users.value ?? [])
 const isEditModalOpen = ref(false)
 const deletingUserId = ref<string | null>(null)
 const selectedUser = ref<AdminUser | null>(null)
-const actionError = ref('')
 
 const columns: TableColumn<AdminUser>[] = [
     {
@@ -45,7 +45,6 @@ function getUserId(user: AdminUser) {
 
 function openEditModal(user: AdminUser) {
     selectedUser.value = user
-    actionError.value = ''
     isEditModalOpen.value = true
 }
 
@@ -61,49 +60,26 @@ watch(isEditModalOpen, (open) => {
     }
 })
 
-function getErrorMessage(error: unknown) {
-    if (typeof error === 'object' && error && 'data' in error) {
-        const data = (error as { data?: { statusMessage?: string; message?: string } }).data
-        if (data?.statusMessage) {
-            return data.statusMessage
-        }
-        if (data?.message) {
-            return data.message
-        }
-    }
-
-    if (typeof error === 'object' && error && 'statusMessage' in error) {
-        const statusMessage = (error as { statusMessage?: string }).statusMessage
-        if (statusMessage) {
-            return statusMessage
-        }
-    }
-
-    if (error instanceof Error && error.message) {
-        return error.message
-    }
-
-    return 'Failed to delete user.'
-}
-
 async function removeUser(user: AdminUser) {
-    const confirmed = window.confirm(`Delete ${user.name}? This action cannot be undone.`)
+    const userId = getUserId(user)
 
-    if (!confirmed) {
-        return
-    }
+    await openConfirmation({
+        title: `Delete ${user.name}?`,
+        description: 'This action cannot be undone. The user account, profile, session, and auth records will be removed.',
+        confirmLabel: 'Delete User',
+        color: 'error',
+        icon: 'i-lucide-triangle-alert',
+        onConfirm: async () => {
+            deletingUserId.value = userId
 
-    deletingUserId.value = getUserId(user)
-    actionError.value = ''
-
-    try {
-        await deleteUser(getUserId(user))
-        await refresh()
-    } catch (error) {
-        actionError.value = getErrorMessage(error)
-    } finally {
-        deletingUserId.value = null
-    }
+            try {
+                await deleteUser(userId)
+                await refresh()
+            } finally {
+                deletingUserId.value = null
+            }
+        },
+    })
 }
 </script>
 
@@ -145,10 +121,6 @@ async function removeUser(user: AdminUser) {
 
         <p v-if="error" class="mt-4 text-sm text-error">
             Failed to load users.
-        </p>
-
-        <p v-if="actionError" class="mt-4 text-sm text-error">
-            {{ actionError }}
         </p>
     </UContainer>
 
