@@ -177,8 +177,11 @@ export const useTour = () => {
 
       const creator = savedTour?.creator
       const organizerSlug =
-        creator && typeof creator === 'object' && 'slug' in creator && typeof creator.slug === 'string'
-          ? creator.slug
+        creator
+        && typeof creator === 'object'
+        && 'username' in creator
+        && typeof creator.username === 'string'
+          ? creator.username
           : null
 
       if (organizerSlug) {

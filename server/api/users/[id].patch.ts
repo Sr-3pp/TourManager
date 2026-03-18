@@ -111,6 +111,10 @@ export default defineEventHandler(async (event) => {
     userUpdate.name = normalizeString(body.name, 'name')
   }
 
+  if ('lastname' in body && body.lastname !== undefined) {
+    userUpdate.lastname = normalizeOptionalString(body.lastname, 'lastname')
+  }
+
   if ('email' in body && body.email !== undefined) {
     userUpdate.email = normalizeString(body.email, 'email').toLowerCase()
   }

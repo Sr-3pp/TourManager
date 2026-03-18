@@ -2,7 +2,9 @@
   <div>
     <NuxtRouteAnnouncer />
     <Navigation />
-    <NuxtPage />
+    <UMain>
+      <NuxtPage />
+    </UMain>
     <ConfirmationModal />
   </div>
 </template>

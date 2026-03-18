@@ -2,7 +2,7 @@
 import type { OrganizerResponse } from '~~/types/profile'
 
 const { params } = useRoute()
-const slug = computed(() =>
+const username = computed(() =>
   String(Array.isArray(params.slug) ? params.slug[0] : params.slug || '')
     .trim()
     .toLowerCase(),
@@ -11,16 +11,16 @@ const slug = computed(() =>
 const { getToursByOrganizer } = useTour()
 
 const { data, error, status } = await useAsyncData<OrganizerResponse>(
-  () => `organizer-${slug.value}`,
+  () => `organizer-${username.value}`,
   async (): Promise<OrganizerResponse> => {
     const [organizerData, tours] = await Promise.all([
-      $fetch<{ user: OrganizerResponse['user'] }>(`/api/users/${encodeURIComponent(slug.value)}`).catch((err) => {
+      $fetch<{ user: OrganizerResponse['user'] }>(`/api/users/${encodeURIComponent(username.value)}`).catch((err) => {
         if (err.statusCode === 404) {
           return null
         }
         throw err
       }),
-      getToursByOrganizer(slug.value).catch((err) => {
+      getToursByOrganizer(username.value).catch((err) => {
         console.error('Error al cargar tours del organizador:', err)
         return []
       }),
@@ -34,7 +34,7 @@ const { data, error, status } = await useAsyncData<OrganizerResponse>(
     }
     return { user: organizerData.user, tours }
   },
-  { watch: [slug] },
+  { watch: [username] },
 )
 
 const organizer = computed<OrganizerResponse['user'] | null>(() => data.value?.user ?? null)

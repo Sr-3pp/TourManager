@@ -12,13 +12,16 @@ export type AdminUser = {
   id: string
   _id?: string
   name: string
+  lastname?: string
   email: string
+  username?: string
   level?: number
   profile?: AdminUserProfile
 }
 
 export type AdminUserUpdateBody = {
   name?: string
+  lastname?: string
   email?: string
   level?: number
   password?: string
@@ -27,6 +30,7 @@ export type AdminUserUpdateBody = {
 
 export type UserEditFormState = {
   name: string
+  lastname: string
   email: string
   level: number
   password: string

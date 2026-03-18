@@ -47,5 +47,5 @@ export function getTourOrganizerName(tour: Pick<Tour, 'creator'> | null | undefi
     return creator
   }
 
-  return creator.name || creator.slug || 'Organizador por confirmar'
+  return creator.name || creator.username || 'Organizador por confirmar'
 }

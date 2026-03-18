@@ -97,7 +97,7 @@ export default defineEventHandler(async (event) => {
       runValidators: true,
     },
   )
-    .populate('creator', 'name slug')
+    .populate('creator', 'name username')
     .lean()
 
   return {

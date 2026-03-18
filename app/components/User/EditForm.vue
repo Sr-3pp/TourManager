@@ -16,6 +16,7 @@ const { updateUser } = useUser()
 
 const schema = z.object({
   name: z.string().trim().min(1, 'El nombre es obligatorio'),
+  lastname: z.string(),
   email: z.string().email('El correo electrónico no es válido'),
   level: z.number().int().min(1).max(3),
   password: z.string(),
@@ -56,6 +57,7 @@ const errorMessage = ref('')
 
 const form = reactive<UserEditFormState>({
   name: '',
+  lastname: '',
   email: '',
   level: 1,
   password: '',
@@ -70,6 +72,7 @@ const form = reactive<UserEditFormState>({
 function syncForm(user: AdminUser) {
   errorMessage.value = ''
   form.name = user.name
+  form.lastname = user.lastname ?? ''
   form.email = user.email
   form.level = user.level ?? 1
   form.password = ''
@@ -125,6 +128,7 @@ async function onSubmit(event: FormSubmitEvent<UserEditFormState>) {
   try {
     await updateUser(getUserId(props.user), {
       name: event.data.name,
+      lastname: event.data.lastname || undefined,
       email: event.data.email,
       level: event.data.level,
       password: event.data.password || undefined,
@@ -160,6 +164,10 @@ async function onSubmit(event: FormSubmitEvent<UserEditFormState>) {
     <UForm :schema="schema" :state="form" class="space-y-4" @submit="onSubmit">
       <UFormField name="name" label="Nombre">
         <UInput v-model="form.name" />
+      </UFormField>
+
+      <UFormField name="lastname" label="Apellidos">
+        <UInput v-model="form.lastname" />
       </UFormField>
 
       <UFormField name="email" label="Correo electrónico">

@@ -17,7 +17,7 @@ defineProps<{
         <div class="w-full flex justify-between items-center py-6">
             <h1 class="text-2xl font-bold mb-4">
                 {{ user?.name }} <br>
-                <small>{{ user?.slug }}</small>
+                <small>{{ user?.username }}</small>
             </h1>
         </div>
         <figure class="flex-shrink-0 h-32 w-32 rounded-full border object-cover -mt-16 overflow-hidden mb-4" v-if="profile?.picture">

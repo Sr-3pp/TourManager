@@ -51,7 +51,7 @@ const socialNetworks = computed(() => props.profile?.social ?? null)
 
               <div class="min-w-0">
                 <h2 class="truncate text-3xl font-bold tracking-tight sm:text-4xl">{{ user?.name || 'Perfil' }}</h2>
-                <p v-if="user?.slug" class="mt-2 text-sm font-medium text-primary">@{{ user.slug }}</p>
+                <p v-if="user?.username" class="mt-2 text-sm font-medium text-primary">@{{ user?.username }}</p>
                 <p v-else class="mt-2 text-sm text-muted">Perfil público del organizador</p>
               </div>
             </div>

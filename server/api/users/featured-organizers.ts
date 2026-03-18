@@ -3,7 +3,7 @@ import '~~/server/models/User'
 import { Profile } from '~~/server/models/Profile'
 import { Tour } from '~~/server/models/Tour'
 import { dbConnect } from '~~/server/utils/db'
-import { ensureUserSlug } from '~~/server/utils/slug'
+import { ensureUsername } from '~~/server/utils/username'
 import mongoose from 'mongoose'
 
 export default defineEventHandler(async () => {
@@ -11,7 +11,7 @@ export default defineEventHandler(async () => {
 
   const featuredProfiles = await Profile.find({ featured: true })
     .sort({ updatedAt: -1, _id: -1 })
-    .populate('user', 'name slug')
+    .populate('user', 'name username')
     .lean()
 
   const organizerIds = featuredProfiles
@@ -44,9 +44,9 @@ export default defineEventHandler(async () => {
     featuredProfiles
       .filter(profile => profile.user && typeof profile.user === 'object')
       .map(async (profile) => {
-        const user = profile.user as { _id?: string; name?: string; slug?: string }
+        const user = profile.user as { _id?: string; name?: string; username?: string }
         const userId = String(user._id || '')
-        const ensuredSlug = userId ? await ensureUserSlug(userId, user.name) : user.slug
+        const ensuredUsername = userId ? await ensureUsername(userId, user.name) : user.username
 
         return {
           profile: {
@@ -57,7 +57,7 @@ export default defineEventHandler(async () => {
           user: {
             id: userId,
             name: user.name,
-            slug: ensuredSlug || user.slug,
+            username: ensuredUsername || user.username,
           },
         }
       }),

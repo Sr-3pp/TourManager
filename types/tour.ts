@@ -17,7 +17,7 @@ export type Tour = {
 export type TourCreatorSummary = {
   _id?: string
   name?: string
-  slug?: string
+  username?: string
 }
 
 export type TourSocial = {

@@ -71,7 +71,7 @@ function getOrganizerSocialLinksCount(social?: Record<string, string>) {
                 <div class="min-w-0">
                   <p class="text-sm font-medium uppercase tracking-[0.18em] text-primary">Organizador destacado</p>
                   <h3 class="truncate text-3xl font-semibold">{{ entry.user.name || 'Organizador' }}</h3>
-                  <p v-if="entry.user.slug" class="mt-1 text-sm text-muted">@{{ entry.user.slug }}</p>
+                  <p v-if="entry.user.username" class="mt-1 text-sm text-muted">@{{ entry.user.username }}</p>
                 </div>
               </div>
 
@@ -92,8 +92,8 @@ function getOrganizerSocialLinksCount(social?: Record<string, string>) {
 
               <div class="flex flex-wrap gap-3 justify-center">
                 <UButton
-                  v-if="entry.user.id || entry.user.slug"
-                  :to="`/organizer/${entry.user.id || entry.user.slug}`"
+                  v-if="entry.user.id || entry.user.username"
+                  :to="`/organizer/${entry.user.username || entry.user.id}`"
                   color="secondary"
                 >
                   Ver organizador

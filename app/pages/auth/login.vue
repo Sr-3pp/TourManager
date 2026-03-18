@@ -40,18 +40,20 @@ async function onSubmit(event: FormSubmitEvent<z.output<typeof loginSchema>>) {
 </script>
 
 <template>
+  <section aria-labelledby="login-heading">
     <UContainer class="py-8">
-        <h1 class="text-2xl font-bold mb-4">Iniciar sesión</h1>
-        <p class="text-gray-600 mb-4">Accede a tu cuenta.</p>
+      <h1 id="login-heading" class="text-2xl font-bold mb-4">Iniciar sesión</h1>
+      <p class="text-gray-600 mb-4">Accede a tu cuenta.</p>
 
-        <UAuthForm
-            :schema="loginSchema"
-            :fields="loginFields"
-            title="Bienvenido de nuevo"
-            description="Ingresa tus credenciales para continuar."
-            icon="i-lucide-user"
-            class="max-w-md"
-            @submit="onSubmit"
-        />
+      <UAuthForm
+        :schema="loginSchema"
+        :fields="loginFields"
+        title="Bienvenido de nuevo"
+        description="Ingresa tus credenciales para continuar."
+        icon="i-lucide-user"
+        class="max-w-md"
+        @submit="onSubmit"
+      />
     </UContainer>
+  </section>
 </template>

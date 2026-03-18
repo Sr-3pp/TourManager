@@ -54,7 +54,7 @@ export default defineEventHandler(async (event) => {
   })
 
   const populatedTour = await Tour.findById(created._id)
-    .populate('creator', 'name slug')
+    .populate('creator', 'name username')
     .lean()
 
   return {

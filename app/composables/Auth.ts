@@ -1,7 +1,7 @@
 export const useAuth = () => {
-    const session = useState<{ user: { name: string; email: string, level: number }, session: {} } | null>('session', () => null)
+    const session = useState<{ user: { name: string; lastname?: string; username?: string; email: string, level: number }, session: {} } | null>('session', () => null)
 
-    const registerUser = async (email: string, password: string, name: string) => {
+    const registerUser = async (email: string, password: string, name: string, lastname?: string, username?: string) => {
         try {
             return await $fetch('/api/auth/sign-up/email', {
                 method: 'POST',
@@ -9,6 +9,8 @@ export const useAuth = () => {
                     email,
                     password,
                     name,
+                    lastname,
+                    username,
                 },
             })
         } catch (error) {
@@ -43,7 +45,7 @@ export const useAuth = () => {
         
         try {
             const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
-            const data = await $fetch<{ user: { name: string; email: string, level: number }, session: {} }>('/api/auth/get-session', {
+            const data = await $fetch<{ user: { name: string; lastname?: string; username?: string; email: string, level: number }, session: {} }>('/api/auth/get-session', {
                 credentials: 'include',
                 headers,
             })

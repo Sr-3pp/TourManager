@@ -6,6 +6,8 @@ const { registerUser, loginUser, fetchSession } = useAuth()
 
 const registerSchema = z.object({
     name: z.string().min(2),
+    lastname: z.string().min(2),
+    username: z.string().min(3).max(60).regex(/^[a-z0-9-]+$/, 'Solo letras minúsculas, números y guiones'),
     email: z.string().email(),
     password: z.string().min(6),
     verifyPassword: z.string().min(6),
@@ -20,6 +22,20 @@ const registerFields: AuthFormField[] = [
         type: 'text',
         label: 'Nombre',
         placeholder: 'Ingresa tu nombre',
+        required: true,
+    },
+    {
+        name: 'lastname',
+        type: 'text',
+        label: 'Apellidos',
+        placeholder: 'Ingresa tus apellidos',
+        required: true,
+    },
+    {
+        name: 'username',
+        type: 'text',
+        label: 'Nombre de usuario',
+        placeholder: 'elige-tu-usuario',
         required: true,
     },
     {
@@ -46,10 +62,10 @@ const registerFields: AuthFormField[] = [
 ]
 
 async function onSubmit(event: FormSubmitEvent<z.output<typeof registerSchema>>) {
-    const { email, password, name } = event.data
+    const { email, password, name, lastname, username } = event.data
 
     try {
-        await registerUser(email, password, name)
+        await registerUser(email, password, name, lastname, username)
         let session = await fetchSession()
 
         if (!session) {
@@ -67,19 +83,21 @@ async function onSubmit(event: FormSubmitEvent<z.output<typeof registerSchema>>)
 </script>
 
 <template>
-<UContainer class="py-8">
-    <h1 class="text-2xl font-bold mb-4">Registro</h1>
-        <p class="text-gray-600 mb-4">Crea tu cuenta para continuar.</p>
+  <section aria-labelledby="register-heading">
+    <UContainer class="py-8 flex flex-col items-center">
+      <h1 id="register-heading" class="text-2xl font-bold mb-4">Registro</h1>
+      <p class="text-gray-600 mb-4">Crea tu cuenta para continuar.</p>
 
-        <UAuthForm
-            :schema="registerSchema"
-            :fields="registerFields"
-            title="Crear cuenta"
-            description="Completa tus datos para comenzar."
-            icon="i-lucide-user-plus"
-            :submit="{ label: 'Crear cuenta' }"
-            class="max-w-md"
-            @submit="onSubmit"
-        />
+      <UAuthForm
+        :schema="registerSchema"
+        :fields="registerFields"
+        title="Crear cuenta"
+        description="Completa tus datos para comenzar."
+        icon="i-lucide-user-plus"
+        :submit="{ label: 'Crear cuenta' }"
+        class="max-w-md"
+        @submit="onSubmit"
+      />
     </UContainer>
+  </section>
 </template>

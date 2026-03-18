@@ -6,7 +6,7 @@ export default defineEventHandler(async () => {
 
   const tours = await Tour.find({ featured: true })
     .sort({ date: 1 })
-    .populate('creator', 'name slug')
+    .populate('creator', 'name username')
     .lean()
 
   return {

@@ -2,7 +2,7 @@ import type { H3Event } from 'h3'
 import '~~/server/models/Profile'
 import mongoose from 'mongoose'
 import { User } from '~~/server/models/User'
-import { ensureUserSlug } from '~~/server/utils/slug'
+import { ensureUsername } from '~~/server/utils/username'
 import { dbConnect } from '~~/server/utils/db'
 
 function isObjectIdLike(value: string) {
@@ -13,7 +13,7 @@ function escapeRegex(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
-function getSlugFromRequest(event: H3Event) {
+function getUsernameFromRequest(event: H3Event) {
   const routeSlug = getRouterParam(event, 'slug')
 
   if (routeSlug) {
@@ -27,14 +27,14 @@ function getSlugFromRequest(event: H3Event) {
   return String(lastSegment || '').trim().toLowerCase()
 }
 
-async function findUserBySlugOrName(slug: string) {
-  const bySlug = await User.findOne({ slug }).populate('profile')
+async function findUserByUsernameOrName(username: string) {
+  const byUsername = await User.findOne({ username }).populate('profile')
 
-  if (bySlug) {
-    return bySlug
+  if (byUsername) {
+    return byUsername
   }
 
-  const normalizedPattern = escapeRegex(slug).replace(/-/g, '[\\s-]+')
+  const normalizedPattern = escapeRegex(username).replace(/-/g, '[\\s-]+')
   return User.findOne({
     name: {
       $regex: new RegExp(`^${normalizedPattern}$`, 'i'),
@@ -42,17 +42,17 @@ async function findUserBySlugOrName(slug: string) {
   }).populate('profile')
 }
 
-async function findUserBySlugOrNameRaw(slug: string) {
+async function findUserByUsernameOrNameRaw(username: string) {
   const db = mongoose.connection.db
 
   if (!db) {
     return null
   }
 
-  const normalizedPattern = escapeRegex(slug).replace(/-/g, '[\\s-]+')
+  const normalizedPattern = escapeRegex(username).replace(/-/g, '[\\s-]+')
   const doc = await db.collection('users').findOne({
     $or: [
-      { slug },
+      { username },
       {
         name: {
           $regex: new RegExp(`^${normalizedPattern}$`, 'i'),
@@ -71,18 +71,18 @@ async function findUserBySlugOrNameRaw(slug: string) {
 export default defineEventHandler(async (event) => {
   await dbConnect()
 
-  const slug = getSlugFromRequest(event)
+  const username = getUsernameFromRequest(event)
 
-  if (!slug) {
+  if (!username) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Slug is required',
+      statusMessage: 'Username is required',
     })
   }
 
-  const user = isObjectIdLike(slug)
-    ? await User.findById(slug).populate('profile')
-    : (await findUserBySlugOrName(slug)) || (await findUserBySlugOrNameRaw(slug))
+  const user = isObjectIdLike(username)
+    ? await User.findById(username).populate('profile')
+    : (await findUserByUsernameOrName(username)) || (await findUserByUsernameOrNameRaw(username))
 
   if (!user) {
     throw createError({
@@ -91,10 +91,10 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  if (!user.slug?.trim()) {
-    const ensuredSlug = await ensureUserSlug(String(user._id), user.name)
-    if (ensuredSlug) {
-      user.slug = ensuredSlug
+  if (!user.username?.trim()) {
+    const ensuredUsername = await ensureUsername(String(user._id), user.name)
+    if (ensuredUsername) {
+      user.username = ensuredUsername
     }
   }
 

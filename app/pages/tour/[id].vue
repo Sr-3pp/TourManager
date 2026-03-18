@@ -49,17 +49,23 @@ const organizerName = computed(() => {
     return creator
   }
 
-  return creator.name || creator.slug || 'Organizador por confirmar'
+  return creator.name || creator.username || 'Organizador por confirmar'
 })
 
 const organizerLink = computed(() => {
   const creator = tour.value?.creator
 
-  if (!creator || typeof creator === 'string' || !creator.slug) {
+  if (!creator || typeof creator === 'string') {
     return null
   }
 
-  return `/organizer/${creator.slug}`
+  const handle = creator.username
+
+  if (!handle) {
+    return null
+  }
+
+  return `/organizer/${handle}`
 })
 
 const attendeeCount = computed(() => tour.value?.attendees?.length ?? 0)
