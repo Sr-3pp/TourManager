@@ -7,11 +7,15 @@ const { session, fetchSession } = useAuth()
 const { profile, loadProfile } = useProfile()
 const { tour, loadTour } = useTour()
 
+type ResettableModalForm = {
+  resetDraft: () => void
+}
+
 const editTourModal = ref(false)
 const addAttendeeModal = ref(false)
 const addSponsorModal = ref(false)
-const attendeeFormRef = ref<InstanceType<typeof TourAttendeeForm> | null>(null)
-const sponsorFormRef = ref<InstanceType<typeof TourSponsorForm> | null>(null)
+const attendeeFormRef = ref<ResettableModalForm | null>(null)
+const sponsorFormRef = ref<ResettableModalForm | null>(null)
 
 await fetchSession()
 
