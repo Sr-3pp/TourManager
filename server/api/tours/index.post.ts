@@ -6,6 +6,7 @@ import {
   normalizeDate,
   normalizeDeparturePoints,
   normalizeNullableString,
+  normalizeNumber,
   normalizePackages,
   normalizeSponsors,
   normalizeString,
@@ -29,6 +30,7 @@ export default defineEventHandler(async (event) => {
   const description = normalizeString(body.description, 'description')
   const location = normalizeString(body.location, 'location')
   const date = normalizeDate(body.date, 'date')
+  const price = normalizeNumber(body.price, 'price', { required: true, min: 0 })
   const featured = body.featured === undefined ? false : normalizeBoolean(body.featured, 'featured')
   const attendees = normalizeAttendees(body.attendees)
   const sponsors = normalizeSponsors(body.sponsors)
@@ -44,6 +46,7 @@ export default defineEventHandler(async (event) => {
     description,
     location,
     date,
+    price,
     featured,
     image: imagePath ?? null,
     creator: session.user.id,

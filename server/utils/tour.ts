@@ -79,6 +79,40 @@ export function normalizeBoolean(value: unknown, field: string) {
   })
 }
 
+export function normalizeNumber(value: unknown, field: string, options?: { required?: boolean, min?: number }) {
+  const required = options?.required ?? false
+  const min = options?.min
+
+  if (value === undefined || value === null || value === '') {
+    if (required) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: `${field} is required`,
+      })
+    }
+
+    return 0
+  }
+
+  const number = Number(value)
+
+  if (!Number.isFinite(number)) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: `${field} must be a number`,
+    })
+  }
+
+  if (min !== undefined && number < min) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: `${field} must be at least ${min}`,
+    })
+  }
+
+  return number
+}
+
 export function normalizeDate(value: unknown, field: string) {
   const dateString = normalizeString(value, field, { required: true })
   const parsed = new Date(dateString)
@@ -327,6 +361,7 @@ export async function parseTourBody(event: H3Event, sessionUserId: string) {
       description: field('description'),
       location: field('location'),
       date: field('date'),
+      price: field('price'),
       featured: field('featured') === undefined ? undefined : field('featured') === 'true',
       attendees: parseMultipartJson(field('attendees'), 'attendees'),
       sponsors: parseMultipartJson(field('sponsors'), 'sponsors'),

@@ -60,6 +60,7 @@ export type TourFormState = {
   description: string
   location: string
   date: string
+  price: number
   packages: TourPackage[]
   departure_points: Array<Omit<TourDeparturePoint, 'dateTime'> & { dateTime: string }>
 }
@@ -86,6 +87,7 @@ export type TourCreateBody = {
   description?: string
   date?: string
   location?: string
+  price?: unknown
   image?: string | null
   featured?: boolean
   attendees?: unknown

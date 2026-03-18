@@ -6,6 +6,7 @@ import {
   normalizeDate,
   normalizeDeparturePoints,
   normalizeNullableString,
+  normalizeNumber,
   normalizePackages,
   normalizeSponsors,
   normalizeString,
@@ -17,6 +18,7 @@ const scalarFieldNormalizers = {
   description: (value: unknown) => normalizeString(value, 'description'),
   location: (value: unknown) => normalizeString(value, 'location'),
   date: (value: unknown) => normalizeDate(value, 'date'),
+  price: (value: unknown) => normalizeNumber(value, 'price', { required: true, min: 0 }),
   featured: (value: unknown) => normalizeBoolean(value, 'featured'),
   image: (value: unknown) => normalizeNullableString(value, 'image'),
 } satisfies Record<string, (value: unknown) => unknown>

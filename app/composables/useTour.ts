@@ -125,6 +125,7 @@ export const useTour = () => {
       formData.append('description', form.description?.trim() ?? '')
       formData.append('location', form.location?.trim() ?? '')
       formData.append('date', form.date ?? '')
+      formData.append('price', String(form.price ?? 0))
       formData.append('packages', JSON.stringify(form.packages ?? []))
       formData.append('departure_points', JSON.stringify(form.departure_points ?? []))
 
@@ -176,19 +177,27 @@ export const useTour = () => {
       }
 
       const creator = savedTour?.creator
-      const organizerSlug =
-        creator
-        && typeof creator === 'object'
-        && 'username' in creator
-        && typeof creator.username === 'string'
-          ? creator.username
-          : null
+      const organizerKeys = creator && typeof creator === 'object'
+        ? [
+            ('_id' in creator && typeof creator._id === 'string' ? creator._id : null),
+            ('username' in creator && typeof creator.username === 'string' ? creator.username : null),
+          ].filter((value): value is string => Boolean(value))
+        : []
 
-      if (organizerSlug) {
-        const { [organizerSlug]: _removed, ...rest } = organizerTours.value
-        organizerTours.value = rest
-      } else {
-        organizerTours.value = {}
+      for (const organizerKey of organizerKeys) {
+        const cachedTours = organizerTours.value[organizerKey]
+
+        if (!cachedTours) {
+          continue
+        }
+
+        const index = cachedTours.findIndex(item => item._id === savedTour._id)
+
+        if (index >= 0) {
+          cachedTours.splice(index, 1, savedTour)
+        } else {
+          cachedTours.unshift(savedTour)
+        }
       }
 
       successMessage.value = hasId ? 'Tour actualizado correctamente.' : 'Tour creado correctamente.'
@@ -268,6 +277,7 @@ export const useTour = () => {
   return {
     tours,
     tour,
+    organizerTours,
     featuredTours,
     featuredTour,
     secondaryFeaturedTours,

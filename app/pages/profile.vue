@@ -6,7 +6,7 @@ definePageMeta({
 const { session } = useAuth()
 
 const { profile, loadProfile } = useProfile()
-const { getToursByOrganizer } = useTour()
+const { organizerTours, getToursByOrganizer } = useTour()
 
 await loadProfile()
 
@@ -14,12 +14,18 @@ const profileModal = ref(false)
 const tourModal = ref(false)
 const organizerId = computed(() => profile.value?.user ?? '')
 
-const tours = organizerId.value
-    ? await getToursByOrganizer(organizerId.value).catch((err) => {
+watchEffect(() => {
+    if (!organizerId.value) {
+        return
+    }
+
+    getToursByOrganizer(organizerId.value).catch((err) => {
         console.error('Error al cargar tours del organizador:', err)
         return []
     })
-    : []
+})
+
+const tours = computed(() => organizerTours.value[organizerId.value] ?? [])
 </script>
 
 <template>
