@@ -126,6 +126,8 @@ export const useTour = () => {
       formData.append('location', form.location?.trim() ?? '')
       formData.append('date', form.date ?? '')
       formData.append('price', String(form.price ?? 0))
+      formData.append('attendees', JSON.stringify(form.attendees ?? []))
+      formData.append('sponsors', JSON.stringify(form.sponsors ?? []))
       formData.append('packages', JSON.stringify(form.packages ?? []))
       formData.append('departure_points', JSON.stringify(form.departure_points ?? []))
 

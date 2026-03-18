@@ -1,13 +1,53 @@
 <script setup lang="ts">
 import type { Tour } from '~~/types/tour'
 
-const id = useRoute().params.id as string
+const id = String(useRoute().params.id || '')
 
-const { loadTour } = useTour()
+const { session, fetchSession } = useAuth()
+const { profile, loadProfile } = useProfile()
+const { tour, loadTour } = useTour()
 
-const { data: tour, error } = await useAsyncData<Tour | null>(
-  () => `tour-${id}`,
-  () => loadTour(id),
+const editTourModal = ref(false)
+const addAttendeeModal = ref(false)
+const addSponsorModal = ref(false)
+const attendeeFormRef = ref<InstanceType<typeof TourAttendeeForm> | null>(null)
+const sponsorFormRef = ref<InstanceType<typeof TourSponsorForm> | null>(null)
+
+await fetchSession()
+
+if (session.value) {
+  await loadProfile()
+}
+
+const loadedTour = await loadTour(id)
+
+if (!loadedTour) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'No se pudo cargar el tour',
+    fatal: true,
+  })
+}
+
+const creatorId = computed(() => {
+  const creator = tour.value?.creator
+
+  if (!creator) {
+    return ''
+  }
+
+  return typeof creator === 'string' ? creator : String(creator._id || '')
+})
+
+const isOwner = computed(() => {
+  return Boolean(profile.value?.user && creatorId.value && profile.value.user === creatorId.value)
+})
+
+const packageOptions = computed(() =>
+  (tour.value?.packages ?? []).map(pkg => ({
+    label: pkg.name,
+    value: String(pkg.level),
+  })),
 )
 
 const formattedDate = computed(() => {
@@ -33,7 +73,7 @@ const formattedPrice = computed(() => {
 
   return new Intl.NumberFormat('es-MX', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'MXN',
     maximumFractionDigits: 0,
   }).format(price)
 })
@@ -55,17 +95,11 @@ const organizerName = computed(() => {
 const organizerLink = computed(() => {
   const creator = tour.value?.creator
 
-  if (!creator || typeof creator === 'string') {
+  if (!creator || typeof creator === 'string' || !creator.username) {
     return null
   }
 
-  const handle = creator.username
-
-  if (!handle) {
-    return null
-  }
-
-  return `/organizer/${handle}`
+  return `/organizer/${creator.username}`
 })
 
 const attendeeCount = computed(() => tour.value?.attendees?.length ?? 0)
@@ -89,12 +123,19 @@ function formatDepartureDate(value: string | Date) {
   }).format(date)
 }
 
-if (error.value) {
-  throw createError({
-    statusCode: error.value.statusCode || 500,
-    statusMessage: error.value.statusMessage || 'No se pudo cargar el tour',
-    fatal: true,
-  })
+function packageLabelByLevel(level: string) {
+  const match = tour.value?.packages?.find(pkg => String(pkg.level) === String(level))
+  return match?.name || level
+}
+
+function openAddAttendeeModal() {
+  attendeeFormRef.value?.resetDraft()
+  addAttendeeModal.value = true
+}
+
+function openAddSponsorModal() {
+  sponsorFormRef.value?.resetDraft()
+  addSponsorModal.value = true
 }
 </script>
 
@@ -132,10 +173,20 @@ if (error.value) {
               </div>
 
               <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-primary/80 via-secondary/35 to-transparent p-5 sm:p-7">
-                <div class="flex flex-wrap gap-2">
-                  <UBadge color="secondary" variant="solid"> {{ formattedDate }} </UBadge>
-                  <UBadge color="primary" variant="solid"> {{ formattedPrice }} </UBadge>
-                  <UBadge color="secondary" variant="solid"> {{ tour?.location }} </UBadge>
+                <div class="flex flex-wrap items-center gap-2">
+                  <UBadge color="secondary" variant="solid">{{ formattedDate }}</UBadge>
+                  <UBadge color="primary" variant="solid">{{ formattedPrice }}</UBadge>
+                  <UBadge color="secondary" variant="solid">{{ tour?.location }}</UBadge>
+                  <UButton
+                    v-if="isOwner"
+                    size="sm"
+                    color="neutral"
+                    variant="solid"
+                    class="ml-auto"
+                    @click="editTourModal = true"
+                  >
+                    Editar tour
+                  </UButton>
                 </div>
               </div>
             </figure>
@@ -232,7 +283,7 @@ if (error.value) {
                       <p class="text-sm text-muted">{{ pkg.description }}</p>
                     </div>
                     <UBadge color="primary" variant="soft">
-                      {{ new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(pkg.price) }}
+                      {{ new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 }).format(pkg.price) }}
                     </UBadge>
                   </div>
 
@@ -289,7 +340,18 @@ if (error.value) {
                   <p class="text-sm font-medium uppercase tracking-[0.18em] text-primary">Asistentes</p>
                   <h2 class="mt-2 text-2xl font-semibold">Quiénes vienen</h2>
                 </div>
-                <UBadge color="neutral" variant="soft">{{ attendeeCount }}</UBadge>
+                <div class="flex items-center gap-2">
+                  <UButton
+                    v-if="isOwner"
+                    size="sm"
+                    variant="soft"
+                    icon="i-lucide-plus"
+                    @click="openAddAttendeeModal"
+                  >
+                    Agregar
+                  </UButton>
+                  <UBadge color="neutral" variant="soft">{{ attendeeCount }}</UBadge>
+                </div>
               </div>
 
               <div v-if="tour?.attendees?.length" class="mt-6 space-y-3">
@@ -321,7 +383,18 @@ if (error.value) {
                   <p class="text-sm font-medium uppercase tracking-[0.18em] text-primary">Patrocinadores</p>
                   <h2 class="mt-2 text-2xl font-semibold">Aliados</h2>
                 </div>
-                <UBadge color="neutral" variant="soft">{{ sponsorCount }}</UBadge>
+                <div class="flex items-center gap-2">
+                  <UButton
+                    v-if="isOwner"
+                    size="sm"
+                    variant="soft"
+                    icon="i-lucide-plus"
+                    @click="openAddSponsorModal"
+                  >
+                    Agregar
+                  </UButton>
+                  <UBadge color="neutral" variant="soft">{{ sponsorCount }}</UBadge>
+                </div>
               </div>
 
               <div v-if="tour?.sponsors?.length" class="mt-6 space-y-3">
@@ -332,7 +405,7 @@ if (error.value) {
                 >
                   <div class="min-w-0">
                     <p class="font-medium">{{ sponsor.name }}</p>
-                    <p class="text-sm text-muted">{{ sponsor.packageLevel }}</p>
+                    <p class="text-sm text-muted">{{ packageLabelByLevel(sponsor.packageLevel) }}</p>
                     <NuxtLink
                       v-if="sponsor.website"
                       :to="sponsor.website"
@@ -395,5 +468,36 @@ if (error.value) {
         </aside>
       </div>
     </UContainer>
+
+    <UModal v-model:open="editTourModal" title="Editar tour">
+      <template #body>
+        <TourForm :tour-id="id" @saved="editTourModal = false" />
+      </template>
+    </UModal>
+
+    <UModal v-model:open="addAttendeeModal" title="Agregar asistente">
+      <template #body>
+        <TourAttendeeForm
+          ref="attendeeFormRef"
+          :tour="tour!"
+          :tour-id="id"
+          @saved="addAttendeeModal = false"
+          @cancel="addAttendeeModal = false"
+        />
+      </template>
+    </UModal>
+
+    <UModal v-model:open="addSponsorModal" title="Agregar patrocinador">
+      <template #body>
+        <TourSponsorForm
+          ref="sponsorFormRef"
+          :tour="tour!"
+          :tour-id="id"
+          :package-options="packageOptions"
+          @saved="addSponsorModal = false"
+          @cancel="addSponsorModal = false"
+        />
+      </template>
+    </UModal>
   </section>
 </template>

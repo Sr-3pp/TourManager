@@ -7,7 +7,7 @@ export function formatTourPrice(value: number | null | undefined, options?: Intl
 
   return new Intl.NumberFormat(DEFAULT_LOCALE, {
     style: 'currency',
-    currency: 'USD',
+    currency: 'MXN',
     maximumFractionDigits: 0,
     ...options,
   }).format(price)

@@ -2,7 +2,6 @@
 import * as z from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
 import type { Tour, TourFormInitialValues, TourFormState } from '~~/types/tour'
-import { U } from 'vue-router/dist/index-DFCq6eJK.js'
 
 const MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024
 
@@ -12,6 +11,8 @@ const tourSchema = z.object({
 	location: z.string().max(200).optional().default(''),
 	date: z.string().min(1, 'La fecha del tour es obligatoria'),
 	price: z.number().min(0, 'El precio debe ser mayor o igual a 0'),
+	attendees: z.array(z.any()).default([]),
+	sponsors: z.array(z.any()).default([]),
 	packages: z
 		.array(
 			z.object({
@@ -51,6 +52,8 @@ const draft = reactive<TourFormState>({
 	location: '',
 	date: '',
 	price: 0,
+	attendees: [],
+	sponsors: [],
 	packages: [],
 	departure_points: [],
 })
@@ -58,6 +61,14 @@ const draft = reactive<TourFormState>({
 const imageFile = ref<File | null>(null)
 const imagePreviewUrl = ref<string | null>(null)
 const localErrorMessage = ref<string | null>(null)
+
+function cloneSocial(social?: { instagram?: string, x?: string, tiktok?: string } | null) {
+	return {
+		instagram: social?.instagram ?? '',
+		x: social?.x ?? '',
+		tiktok: social?.tiktok ?? '',
+	}
+}
 
 function getNextPackageLevel() {
 	const levels = draft.packages
@@ -142,6 +153,8 @@ const initialValues = computed<TourFormInitialValues>(() => {
 		location: value?.location,
 		date: value?.date ? new Date(value.date).toISOString().slice(0, 16) : '',
 		price: value?.price ?? 0,
+		attendees: value?.attendees ?? [],
+		sponsors: value?.sponsors ?? [],
 		image: value?.image ?? null,
 		packages: value?.packages ?? [],
 		departure_points:
@@ -163,8 +176,31 @@ function mapInitialValues(values?: TourFormInitialValues) {
 	draft.location = values?.location ?? ''
 	draft.date = values?.date ?? ''
 	draft.price = values?.price ?? 0
-	draft.packages = values?.packages ? normalizePackageDrafts(structuredClone(values.packages)) : []
-	draft.departure_points = values?.departure_points ? structuredClone(values.departure_points) : []
+	draft.attendees = (values?.attendees ?? []).map(attendee => ({
+		name: attendee.name ?? '',
+		email: attendee.email ?? '',
+		social: cloneSocial(attendee.social),
+	}))
+	draft.sponsors = (values?.sponsors ?? []).map(sponsor => ({
+		packageLevel: sponsor.packageLevel ?? '',
+		name: sponsor.name ?? '',
+		logo: sponsor.logo ?? null,
+		website: sponsor.website ?? '',
+		social: cloneSocial(sponsor.social),
+	}))
+	draft.packages = normalizePackageDrafts((values?.packages ?? []).map(pkg => ({
+		level: Number(pkg.level) || 1,
+		name: pkg.name ?? '',
+		description: pkg.description ?? '',
+		price: Number(pkg.price) || 0,
+		benefits: [...(pkg.benefits ?? [])],
+	})))
+	draft.departure_points = (values?.departure_points ?? []).map(point => ({
+		name: point.name ?? '',
+		location: point.location ?? '',
+		dateTime: point.dateTime ?? '',
+		notes: point.notes ?? '',
+	}))
 }
 
 function resetDraft() {
@@ -174,6 +210,8 @@ function resetDraft() {
 		location: '',
 		date: '',
 		price: 0,
+		attendees: [],
+		sponsors: [],
 		packages: [],
 		departure_points: [],
 		image: null,
