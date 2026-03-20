@@ -1,17 +1,5 @@
 import mongoose from "mongoose";
-
-export type ProfileDocument = {
-  user: mongoose.Types.ObjectId
-  bio: string
-  featured: boolean
-  social: {
-    instagram: string
-    x: string
-    tiktok: string
-  }
-  picture: string | null
-  banner: string | null
-}
+import type { ProfileDocument } from '~~/types/models'
 
 const ProfileSchema = new mongoose.Schema<ProfileDocument>(
   {

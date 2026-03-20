@@ -1,8 +1,4 @@
-type BaseFetchOptions = NonNullable<Parameters<typeof $fetch>[1]>
-
-type ApiFetchOptions = Omit<BaseFetchOptions, 'headers'> & {
-  headers?: HeadersInit
-}
+import type { ApiFetchOptions } from '~~/types/api'
 
 export function getAuthFetchHeaders() {
   return import.meta.server ? useRequestHeaders(['cookie']) : undefined

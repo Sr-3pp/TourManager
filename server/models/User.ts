@@ -1,12 +1,5 @@
 import mongoose from 'mongoose'
-
-export type UserDocument = {
-  name: string
-  lastname: string
-  email: string
-  emailVerified: boolean
-  username?: string
-}
+import type { UserDocument } from '~~/types/models'
 
 const UserSchema = new mongoose.Schema<UserDocument>(
   {

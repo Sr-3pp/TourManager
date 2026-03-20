@@ -1,17 +1,5 @@
 import { apiFetch } from '~~/app/utils/api'
-
-type AuthSessionUser = {
-  name: string
-  lastname?: string
-  username?: string
-  email: string
-  level: number
-}
-
-type AuthSessionResponse = {
-  user: AuthSessionUser
-  session: Record<string, unknown>
-}
+import type { AuthSessionResponse } from '~~/types/auth'
 
 export const useAuth = () => {
   const session = useState<AuthSessionResponse | null>('session', () => null)

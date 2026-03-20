@@ -1,11 +1,4 @@
-type StringOptions = {
-  required?: boolean
-}
-
-type NumberOptions = {
-  required?: boolean
-  min?: number
-}
+import type { ValidationNumberOptions, ValidationStringOptions } from '~~/types/server'
 
 export function requiredFieldError(field: string) {
   return createError({
@@ -14,7 +7,7 @@ export function requiredFieldError(field: string) {
   })
 }
 
-export function normalizeString(value: unknown, field: string, options?: StringOptions) {
+export function normalizeString(value: unknown, field: string, options?: ValidationStringOptions) {
   const required = options?.required ?? false
 
   if (value === undefined || value === null) {
@@ -83,7 +76,7 @@ export function normalizeBoolean(value: unknown, field: string) {
   })
 }
 
-export function normalizeNumber(value: unknown, field: string, options?: NumberOptions) {
+export function normalizeNumber(value: unknown, field: string, options?: ValidationNumberOptions) {
   const required = options?.required ?? false
   const min = options?.min
 

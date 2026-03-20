@@ -1,4 +1,4 @@
-type JsonLdNode = Record<string, unknown>
+import type { JsonLdNode } from '~~/types/app'
 
 function normalizeSiteUrl(siteUrl: string) {
   const trimmed = String(siteUrl || '').trim()

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Tour } from '~~/types/tour'
+import type { ResettableFormHandle } from '~~/types/app'
 import {
   formatTourDate,
   formatTourPrice,
@@ -15,15 +16,11 @@ const { session, fetchSession } = useAuth()
 const { profile, loadProfile } = useProfile()
 const { tour, loadTour } = useTour()
 
-type ResettableModalForm = {
-  resetDraft: () => void
-}
-
 const editTourModal = ref(false)
 const addAttendeeModal = ref(false)
 const addSponsorModal = ref(false)
-const attendeeFormRef = ref<ResettableModalForm | null>(null)
-const sponsorFormRef = ref<ResettableModalForm | null>(null)
+const attendeeFormRef = ref<ResettableFormHandle | null>(null)
+const sponsorFormRef = ref<ResettableFormHandle | null>(null)
 
 await fetchSession()
 

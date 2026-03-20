@@ -26,3 +26,12 @@ export type FileEntry = {
 }
 
 export type PutBody = Blob | Uint8Array | Buffer | ReadableStream | ArrayBuffer | string
+
+export type ValidationStringOptions = {
+  required?: boolean
+}
+
+export type ValidationNumberOptions = {
+  required?: boolean
+  min?: number
+}
