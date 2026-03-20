@@ -3,6 +3,7 @@ import * as z from 'zod'
 import type { AuthFormField, FormSubmitEvent } from '@nuxt/ui'
 
 const { loginUser, fetchSession } = useAuth()
+const seo = useSeo()
 
 const loginSchema = z.object({
     email: z.string().email(),
@@ -37,6 +38,13 @@ async function onSubmit(event: FormSubmitEvent<z.output<typeof loginSchema>>) {
         console.error('Error durante el inicio de sesión:', error)
     }
 }
+
+seo.noIndex()
+
+useSeoMeta({
+  title: `Iniciar sesión | ${seo.siteName.value}`,
+  description: 'Accede a tu cuenta de Tour Manager.',
+})
 </script>
 
 <template>

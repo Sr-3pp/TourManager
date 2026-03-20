@@ -6,6 +6,7 @@ definePageMeta({
     middleware: ['admin'],
 })
 
+const seo = useSeo()
 const { getUsers, deleteUser } = useUser()
 const { openConfirmation } = useConfirmation()
 
@@ -86,6 +87,13 @@ async function removeUser(user: AdminUser) {
         },
     })
 }
+
+seo.noIndex()
+
+useSeoMeta({
+    title: `Usuarios | ${seo.siteName.value}`,
+    description: 'Gestión administrativa de usuarios en Tour Manager.',
+})
 </script>
 
 <template>

@@ -2,6 +2,7 @@
 import type { OrganizerResponse } from '~~/types/profile'
 
 const { params } = useRoute()
+const seo = useSeo()
 const username = computed(() =>
   String(Array.isArray(params.slug) ? params.slug[0] : params.slug || '')
     .trim()
@@ -40,6 +41,29 @@ const { data, error, status } = await useAsyncData<OrganizerResponse>(
 const organizer = computed<OrganizerResponse['user'] | null>(() => data.value?.user ?? null)
 const organizerProfile = computed(() => organizer.value?.profile ?? null)
 const tours = computed(() => data.value?.tours || [])
+const pageTitle = computed(() => {
+  const organizerLabel = organizer.value?.name || organizer.value?.username || 'Organizador'
+  return `${organizerLabel} | ${seo.siteName.value}`
+})
+const pageDescription = computed(() =>
+  seo.description(
+    organizerProfile.value?.bio,
+    organizer.value?.name ? `Perfil público de ${organizer.value.name}.` : 'Perfil público del organizador.',
+    tours.value.length ? `${tours.value.length} tours publicados.` : 'Conoce sus próximos tours.',
+  ),
+)
+const canonicalUrl = computed(() => seo.canonical(`/organizer/${username.value}`))
+const organizerImage = computed(() => {
+  if (organizerProfile.value?.banner) {
+    return seo.imageUrl(`/blob/${organizerProfile.value.banner}`)
+  }
+
+  if (organizerProfile.value?.picture) {
+    return seo.imageUrl(`/blob/${organizerProfile.value.picture}`)
+  }
+
+  return seo.imageUrl()
+})
 
 if (error.value || (status.value === 'success' && !organizer.value)) {
   throw createError({
@@ -48,6 +72,30 @@ if (error.value || (status.value === 'success' && !organizer.value)) {
     fatal: true,
   })
 }
+
+seo.setCanonical(`/organizer/${username.value}`)
+
+useSeoMeta({
+  title: pageTitle,
+  description: pageDescription,
+  ogTitle: pageTitle,
+  ogDescription: pageDescription,
+  ogType: 'profile',
+  ogUrl: canonicalUrl,
+  ogImage: organizerImage,
+  twitterCard: 'summary_large_image',
+  twitterTitle: pageTitle,
+  twitterDescription: pageDescription,
+  twitterImage: organizerImage,
+})
+
+seo.setJsonLd('organizer-structured-data', {
+  '@type': 'Person',
+  name: organizer.value?.name || organizer.value?.username || 'Organizador',
+  url: canonicalUrl.value,
+  description: pageDescription.value,
+  image: organizerImage.value,
+})
 </script>
 
 <template>

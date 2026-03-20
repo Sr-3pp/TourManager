@@ -3,6 +3,7 @@ import { formatTourDate, formatTourPrice, getTourOrganizerName } from '~~/app/ut
 
 const { featuredTours, featuredTour, loadFeaturedTours } = useTour()
 const { featuredOrganizers, loadFeaturedOrganizers } = useUser()
+const seo = useSeo()
 
 const featuredDate = computed(() => {
   return formatTourDate(featuredTour.value?.date, 'Horario próximamente', {
@@ -14,6 +15,14 @@ const featuredDate = computed(() => {
 
 const featuredPrice = computed(() => formatTourPrice(featuredTour.value?.price))
 const featuredOrganizer = computed(() => getTourOrganizerName(featuredTour.value))
+const pageTitle = computed(() => `Tours destacados y organizadores | ${seo.siteName.value}`)
+const pageDescription = computed(() =>
+  seo.description(
+    'Descubre tours destacados, organizadores y próximas experiencias de viaje en Tour Manager.',
+    featuredTour.value?.name ? `Tour en portada: ${featuredTour.value.name}.` : '',
+    featuredTour.value?.location ? `Ubicación: ${featuredTour.value.location}.` : '',
+  ),
+)
 
 const { error } = await useAsyncData(
   'homepage-featured-content',
@@ -32,6 +41,38 @@ if (error.value) {
     fatal: true,
   })
 }
+
+seo.setCanonical('/')
+
+useSeoMeta({
+  title: pageTitle,
+  description: pageDescription,
+  ogTitle: pageTitle,
+  ogDescription: pageDescription,
+  ogType: 'website',
+  ogUrl: seo.canonical('/'),
+  ogImage: seo.imageUrl(),
+  twitterCard: 'summary_large_image',
+  twitterTitle: pageTitle,
+  twitterDescription: pageDescription,
+  twitterImage: seo.imageUrl(),
+})
+
+seo.setJsonLd('home-structured-data', [
+  {
+    '@type': 'WebSite',
+    name: seo.siteName.value,
+    url: seo.canonical('/'),
+    description: pageDescription.value,
+    inLanguage: 'es-MX',
+  },
+  {
+    '@type': 'Organization',
+    name: seo.siteName.value,
+    url: seo.canonical('/'),
+    logo: seo.imageUrl('/favicon.ico'),
+  },
+])
 </script>
 
 <template>
@@ -50,10 +91,10 @@ if (error.value) {
 
           <div class="space-y-4">
             <h1 class="max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-              Dale a las promociones pagadas la visibilidad en portada que deben tener.
+              Descubre tours destacados, organizadores y nuevas experiencias de viaje.
             </h1>
             <p class="max-w-2xl text-base leading-7 text-muted sm:text-lg">
-              Esta sección está reservada para los tours marcados como destacados, para que los viajes promocionados tengan prioridad en la página principal.
+              Tour Manager reúne tours promocionados y perfiles de organizadores para que la portada muestre las salidas con mayor visibilidad y contexto para nuevos viajeros.
             </p>
           </div>
 
@@ -136,7 +177,7 @@ if (error.value) {
             <h2 class="mt-2 text-3xl font-semibold tracking-tight">Organizadores y tours destacados</h2>
           </div>
           <p class="max-w-2xl text-sm leading-6 text-muted">
-            Aquí los organizadores y tours comparten la misma fila, cada uno dentro de su propio panel con carrusel.
+            Explora perfiles de organizadores, tours activos y experiencias destacadas desde un solo escaparate público.
           </p>
         </div>
 

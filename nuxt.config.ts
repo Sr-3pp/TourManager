@@ -11,7 +11,15 @@ export default defineNuxtConfig({
     r2SecretAccessKey:
       process.env.R2_SECRET_ACCESS_KEY ?? process.env.NUXT_R2_SECRET_ACCESS_KEY ?? '',
     mongoUri: process.env.NUXT_MONGODB_URI || '',
-    mongoDbName: process.env.NUXT_MONGODB_DB_NAME || ''
+    mongoDbName: process.env.NUXT_MONGODB_DB_NAME || '',
+    public: {
+      siteName: process.env.NUXT_PUBLIC_SITE_NAME ?? 'Tour Manager',
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL ?? 'http://localhost:3000',
+      defaultSeoDescription:
+        process.env.NUXT_PUBLIC_DEFAULT_SEO_DESCRIPTION ??
+        'Descubre tours destacados, organizadores y experiencias de viaje en Tour Manager.',
+      defaultOgImage: process.env.NUXT_PUBLIC_DEFAULT_OG_IMAGE ?? '/og/default.svg',
+    },
   },
 
   modules: [
@@ -26,4 +34,19 @@ export default defineNuxtConfig({
   ],
 
   css: ['~/assets/css/main.css'],
+  app: {
+    head: {
+      htmlAttrs: {
+        lang: 'es-MX',
+      },
+      meta: [
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+        { name: 'format-detection', content: 'telephone=no' },
+        { property: 'og:locale', content: 'es_MX' },
+      ],
+      link: [
+        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+      ],
+    },
+  },
 })

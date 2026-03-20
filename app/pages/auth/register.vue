@@ -3,6 +3,7 @@ import * as z from 'zod'
 import type { AuthFormField, FormSubmitEvent } from '@nuxt/ui'
 
 const { registerUser, loginUser, fetchSession } = useAuth()
+const seo = useSeo()
 
 const registerSchema = z.object({
     name: z.string().min(2),
@@ -80,6 +81,13 @@ async function onSubmit(event: FormSubmitEvent<z.output<typeof registerSchema>>)
         console.error('Error durante el registro o inicio de sesión:', error)
     }
 }
+
+seo.noIndex()
+
+useSeoMeta({
+  title: `Registro | ${seo.siteName.value}`,
+  description: 'Crea tu cuenta en Tour Manager.',
+})
 </script>
 
 <template>

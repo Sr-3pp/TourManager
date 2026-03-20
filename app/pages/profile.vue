@@ -4,6 +4,7 @@ definePageMeta({
 })
 
 const { session } = useAuth()
+const seo = useSeo()
 
 const { profile, loadProfile } = useProfile()
 const { organizerTours, getToursByOrganizer } = useTour()
@@ -26,6 +27,13 @@ watchEffect(() => {
 })
 
 const tours = computed(() => organizerTours.value[organizerId.value] ?? [])
+
+seo.noIndex()
+
+useSeoMeta({
+    title: `Tu perfil | ${seo.siteName.value}`,
+    description: 'Administra tu perfil y tus tours en Tour Manager.',
+})
 </script>
 
 <template>
