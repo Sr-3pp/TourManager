@@ -16,6 +16,8 @@ const props = defineProps<{
 defineEmits<{
   addAttendee: []
   addSponsor: []
+  removeAttendee: [index: number]
+  removeSponsor: [index: number]
 }>()
 
 function packageLabelByLevel(level: string) {
@@ -151,18 +153,30 @@ function packageLabelByLevel(level: string) {
 
         <div v-if="tour?.attendees?.length" class="mt-6 space-y-3">
           <div
-            v-for="attendee in tour.attendees"
-            :key="attendee.email"
+            v-for="(attendee, attendeeIndex) in tour.attendees"
+            :key="`${attendee.email}-${attendeeIndex}`"
             class="flex items-start justify-between gap-4 rounded-2xl border border-default p-4"
           >
-            <div>
+            <div class="min-w-0">
               <p class="font-medium">{{ attendee.name }}</p>
               <p class="text-sm text-muted">{{ attendee.email }}</p>
             </div>
-            <div class="flex gap-2 text-muted">
-              <UIcon v-if="attendee.social?.instagram" name="i-simple-icons-instagram" />
-              <UIcon v-if="attendee.social?.x" name="i-simple-icons-x" />
-              <UIcon v-if="attendee.social?.tiktok" name="i-simple-icons-tiktok" />
+            <div class="flex items-start gap-3">
+              <div class="flex gap-2 text-muted">
+                <UIcon v-if="attendee.social?.instagram" name="i-simple-icons-instagram" />
+                <UIcon v-if="attendee.social?.x" name="i-simple-icons-x" />
+                <UIcon v-if="attendee.social?.tiktok" name="i-simple-icons-tiktok" />
+              </div>
+              <UButton
+                v-if="isOwner"
+                size="xs"
+                color="error"
+                variant="ghost"
+                icon="i-lucide-trash"
+                @click="$emit('removeAttendee', attendeeIndex)"
+              >
+                Quitar
+              </UButton>
             </div>
           </div>
         </div>
@@ -194,21 +208,33 @@ function packageLabelByLevel(level: string) {
 
         <div v-if="tour?.sponsors?.length" class="mt-6 space-y-3">
           <div
-            v-for="sponsor in tour.sponsors"
-            :key="`${sponsor.name}-${sponsor.website}`"
+            v-for="(sponsor, sponsorIndex) in tour.sponsors"
+            :key="`${sponsor.name}-${sponsor.website}-${sponsorIndex}`"
             class="flex items-start justify-between gap-4 rounded-2xl border border-default p-4"
           >
-            <div class="min-w-0">
-              <p class="font-medium">{{ sponsor.name }}</p>
-              <p class="text-sm text-muted">{{ packageLabelByLevel(sponsor.packageLevel) }}</p>
-              <NuxtLink
-                v-if="sponsor.website"
-                :to="sponsor.website"
-                target="_blank"
-                class="mt-2 inline-flex text-sm text-primary hover:opacity-80"
+            <div class="flex min-w-0 flex-1 items-start justify-between gap-4">
+              <div class="min-w-0">
+                <p class="font-medium">{{ sponsor.name }}</p>
+                <p class="text-sm text-muted">{{ packageLabelByLevel(sponsor.packageLevel) }}</p>
+                <NuxtLink
+                  v-if="sponsor.website"
+                  :to="sponsor.website"
+                  target="_blank"
+                  class="mt-2 inline-flex text-sm text-primary hover:opacity-80"
+                >
+                  Visitar sitio web
+                </NuxtLink>
+              </div>
+              <UButton
+                v-if="isOwner"
+                size="xs"
+                color="error"
+                variant="ghost"
+                icon="i-lucide-trash"
+                @click="$emit('removeSponsor', sponsorIndex)"
               >
-                Visitar sitio web
-              </NuxtLink>
+                Quitar
+              </UButton>
             </div>
             <div v-if="sponsor.logo" class="h-12 w-12 overflow-hidden rounded-xl border border-default">
               <NuxtImg :src="`/blob/${sponsor.logo}`" :alt="`Logotipo de ${sponsor.name}`" class="h-full w-full object-cover" />

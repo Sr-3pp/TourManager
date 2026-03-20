@@ -8,13 +8,15 @@ import {
   getTourOrganizerLink,
   getTourOrganizerName,
 } from '~~/app/utils/tour'
+import { toEditableTourState } from '~~/app/utils/tour-form'
 
 const id = String(useRoute().params.id || '')
 const seo = useSeo()
 
 const { session, fetchSession } = useAuth()
 const { profile, loadProfile } = useProfile()
-const { tour, loadTour } = useTour()
+const { tour, loadTour, saveTour } = useTour()
+const { openConfirmation } = useConfirmation()
 
 const editTourModal = ref(false)
 const addAttendeeModal = ref(false)
@@ -93,6 +95,62 @@ function openAddAttendeeModal() {
 function openAddSponsorModal() {
   sponsorFormRef.value?.resetDraft()
   addSponsorModal.value = true
+}
+
+async function removeAttendee(index: number) {
+  if (!tour.value || !isOwner.value) {
+    return
+  }
+
+  const attendee = tour.value.attendees?.[index]
+  if (!attendee) {
+    return
+  }
+
+  await openConfirmation({
+    title: `¿Quitar a ${attendee.name}?`,
+    description: 'Se eliminará este asistente del tour.',
+    confirmLabel: 'Quitar asistente',
+    color: 'error',
+    icon: 'i-lucide-triangle-alert',
+    onConfirm: async () => {
+      const form = toEditableTourState(tour.value as Tour)
+      form.attendees.splice(index, 1)
+
+      const ok = await saveTour(form, undefined, { id })
+      if (!ok) {
+        throw new Error('No se pudo quitar el asistente.')
+      }
+    },
+  })
+}
+
+async function removeSponsor(index: number) {
+  if (!tour.value || !isOwner.value) {
+    return
+  }
+
+  const sponsor = tour.value.sponsors?.[index]
+  if (!sponsor) {
+    return
+  }
+
+  await openConfirmation({
+    title: `¿Quitar a ${sponsor.name}?`,
+    description: 'Se eliminará este patrocinador del tour.',
+    confirmLabel: 'Quitar patrocinador',
+    color: 'error',
+    icon: 'i-lucide-triangle-alert',
+    onConfirm: async () => {
+      const form = toEditableTourState(tour.value as Tour)
+      form.sponsors.splice(index, 1)
+
+      const ok = await saveTour(form, undefined, { id })
+      if (!ok) {
+        throw new Error('No se pudo quitar el patrocinador.')
+      }
+    },
+  })
 }
 
 seo.setCanonical(`/tour/${id}`)
@@ -178,6 +236,8 @@ seo.setJsonLd('tour-structured-data', {
             :departure-count="departureCount"
             @add-attendee="openAddAttendeeModal"
             @add-sponsor="openAddSponsorModal"
+            @remove-attendee="removeAttendee"
+            @remove-sponsor="removeSponsor"
           />
         </div>
 
