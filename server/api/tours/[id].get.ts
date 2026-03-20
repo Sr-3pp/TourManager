@@ -10,7 +10,9 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const tour = await Tour.findById(id).lean()
+  const tour = await Tour.findById(id)
+    .populate('creator', 'name username')
+    .lean()
 
   if (!tour) {
     throw createError({
