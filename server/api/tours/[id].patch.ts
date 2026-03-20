@@ -1,34 +1,6 @@
 import { Tour } from '~~/server/models/Tour'
+import { buildTourUpdateInput, parseTourBody } from '~~/server/services/tour'
 import { getSessionWithProfile } from '~~/server/utils/auth'
-import {
-  normalizeAttendees,
-  normalizeBoolean,
-  normalizeDate,
-  normalizeDeparturePoints,
-  normalizeNullableString,
-  normalizeNumber,
-  normalizePackages,
-  normalizeSponsors,
-  normalizeString,
-  parseTourBody,
-} from '~~/server/utils/tour'
-
-const scalarFieldNormalizers = {
-  name: (value: unknown) => normalizeString(value, 'name', { required: true }),
-  description: (value: unknown) => normalizeString(value, 'description'),
-  location: (value: unknown) => normalizeString(value, 'location'),
-  date: (value: unknown) => normalizeDate(value, 'date'),
-  price: (value: unknown) => normalizeNumber(value, 'price', { required: true, min: 0 }),
-  featured: (value: unknown) => normalizeBoolean(value, 'featured'),
-  image: (value: unknown) => normalizeNullableString(value, 'image'),
-} satisfies Record<string, (value: unknown) => unknown>
-
-const collectionFieldNormalizers = {
-  attendees: (value: unknown) => normalizeAttendees(value, { requiredFields: true }),
-  sponsors: (value: unknown) => normalizeSponsors(value, { requiredFields: true }),
-  packages: (value: unknown) => normalizePackages(value, { requiredFields: true }),
-  departure_points: (value: unknown) => normalizeDeparturePoints(value, { requiredFields: true }),
-} satisfies Record<string, (value: unknown) => unknown>
 
 export default defineEventHandler(async (event) => {
   const id = String(getRouterParam(event, 'id') || '').trim()
@@ -66,28 +38,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const { body, imagePath } = await parseTourBody(event, session.user.id)
-
-  const update: Record<string, unknown> = {}
-
-  for (const [field, normalize] of Object.entries(scalarFieldNormalizers)) {
-    const value = body[field as keyof typeof body]
-
-    if (value !== undefined) {
-      update[field] = normalize(value)
-    }
-  }
-
-  for (const [field, normalize] of Object.entries(collectionFieldNormalizers)) {
-    const value = body[field as keyof typeof body]
-
-    if (value !== undefined) {
-      update[field] = normalize(value)
-    }
-  }
-
-  if (imagePath !== undefined) {
-    update.image = imagePath
-  }
+  const update = buildTourUpdateInput(body, imagePath)
 
   const updated = await Tour.findOneAndUpdate(
     { _id: id },

@@ -1,6 +1,14 @@
 import mongoose from 'mongoose'
 
-const UserSchema = new mongoose.Schema(
+export type UserDocument = {
+  name: string
+  lastname: string
+  email: string
+  emailVerified: boolean
+  username?: string
+}
+
+const UserSchema = new mongoose.Schema<UserDocument>(
   {
     name: {
       type: String,
@@ -59,4 +67,4 @@ UserSchema.virtual('profile', {
 })
 
 export const User =
-  (mongoose.models.User as mongoose.Model<any>) || mongoose.model('User', UserSchema)
+  (mongoose.models.User as mongoose.Model<UserDocument>) || mongoose.model<UserDocument>('User', UserSchema)

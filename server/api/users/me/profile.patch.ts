@@ -1,42 +1,11 @@
 import { Profile } from '~~/server/models/Profile'
-import { ensureProfileForUser, getSessionWithProfile } from '~~/server/utils/auth'
 import {
-  compressProfileImageForUpload,
-  MAX_PROFILE_UPLOAD_SOURCE_BYTES,
-} from '~~/server/utils/image'
+  buildProfileUpdate,
+  isOwnedProfileBlob,
+  parseProfileUpdateBody,
+} from '~~/server/services/profile'
+import { ensureProfileForUser, getSessionWithProfile } from '~~/server/utils/auth'
 import { useHubBlob } from '~~/server/utils/r2'
-import type { ProfileUpdateBody } from '~~/types/profile'
-
-function normalizeString(value: unknown, field: string) {
-  if (typeof value !== 'string') {
-    throw createError({
-      statusCode: 400,
-      statusMessage: `${field} must be a string`,
-    })
-  }
-
-  return value.trim()
-}
-
-function normalizeNullableString(value: unknown, field: string) {
-  if (value === null) {
-    return null
-  }
-
-  return normalizeString(value, field)
-}
-
-function isOwnedProfileBlob(path: unknown, userId: string): path is string {
-  return typeof path === 'string' && path.startsWith(`profiles/${userId}/`)
-}
-
-const profileFieldNormalizers = {
-  bio: normalizeString,
-  picture: normalizeNullableString,
-  banner: normalizeNullableString,
-} satisfies Record<'bio' | 'picture' | 'banner', typeof normalizeString | typeof normalizeNullableString>
-
-const socialFieldNames = ['instagram', 'x', 'tiktok'] as const
 
 export default defineEventHandler(async (event) => {
   const hubBlob = useHubBlob()
@@ -55,126 +24,16 @@ export default defineEventHandler(async (event) => {
   const previousPicturePath = existingProfile?.picture ?? null
   const previousBannerPath = existingProfile?.banner ?? null
 
-  const contentType = String(getRequestHeader(event, 'content-type') || '').toLowerCase()
-  const isMultipart = contentType.includes('multipart/form-data')
+  const {
+    body,
+    pictureUploadPath,
+    bannerUploadPath,
+  } = await parseProfileUpdateBody(event, session.user.id)
 
-  let body: ProfileUpdateBody = {}
-  let pictureUploadPath: string | undefined
-  let bannerUploadPath: string | undefined
-
-  if (isMultipart) {
-    const formData = (await readMultipartFormData(event)) ?? []
-
-    const field = (name: string) =>
-      formData.find((part) => part.name === name && !part.filename)?.data.toString('utf8')
-
-    const pictureFile = formData.find((part) => part.name === 'pictureFile' && part.filename)
-    const bannerFile = formData.find((part) => part.name === 'bannerFile' && part.filename)
-
-    body = {
-      bio: field('bio'),
-      social: {
-        instagram: field('instagram'),
-        tiktok: field('tiktok'),
-        x: field('x'),
-      },
-    }
-
-    if (pictureFile?.data?.length) {
-      if (pictureFile.data.length > MAX_PROFILE_UPLOAD_SOURCE_BYTES) {
-        throw createError({
-          statusCode: 400,
-          statusMessage: 'pictureFile must be less than 10MB',
-        })
-      }
-
-      const pictureMimeType = String(pictureFile.type || '')
-      if (!pictureMimeType.startsWith('image/')) {
-        throw createError({
-          statusCode: 400,
-          statusMessage: 'pictureFile must be an image',
-        })
-      }
-
-      const compressedPicture = await compressProfileImageForUpload(pictureFile.data, 'picture')
-      const pictureUpload = await hubBlob.put(
-        `picture-${Date.now()}.${compressedPicture.extension}`,
-        compressedPicture.body,
-        {
-          prefix: `profiles/${session.user.id}`,
-          contentType: compressedPicture.contentType,
-        },
-      )
-      pictureUploadPath = pictureUpload.pathname
-    }
-
-    if (bannerFile?.data?.length) {
-      if (bannerFile.data.length > MAX_PROFILE_UPLOAD_SOURCE_BYTES) {
-        throw createError({
-          statusCode: 400,
-          statusMessage: 'bannerFile must be less than 10MB',
-        })
-      }
-
-      const bannerMimeType = String(bannerFile.type || '')
-      if (!bannerMimeType.startsWith('image/')) {
-        throw createError({
-          statusCode: 400,
-          statusMessage: 'bannerFile must be an image',
-        })
-      }
-
-      const compressedBanner = await compressProfileImageForUpload(bannerFile.data, 'banner')
-      const bannerUpload = await hubBlob.put(
-        `banner-${Date.now()}.${compressedBanner.extension}`,
-        compressedBanner.body,
-        {
-          prefix: `profiles/${session.user.id}`,
-          contentType: compressedBanner.contentType,
-        },
-      )
-      bannerUploadPath = bannerUpload.pathname
-    }
-  } else {
-    body = (await readBody<ProfileUpdateBody>(event)) ?? {}
-  }
-
-  const update: Record<string, string | null> = {}
-
-  for (const [field, normalize] of Object.entries(profileFieldNormalizers) as Array<
-    [keyof typeof profileFieldNormalizers, (value: unknown, field: string) => string | null]
-  >) {
-    const value = body[field]
-
-    if (value !== undefined) {
-      update[field] = normalize(value, field)
-    }
-  }
-
-  if (pictureUploadPath) {
-    update.picture = pictureUploadPath
-  }
-
-  if (bannerUploadPath) {
-    update.banner = bannerUploadPath
-  }
-
-  if (body.social) {
-    if (typeof body.social !== 'object' || Array.isArray(body.social)) {
-      throw createError({
-        statusCode: 400,
-        statusMessage: 'social must be an object',
-      })
-    }
-
-    for (const field of socialFieldNames) {
-      const value = body.social[field]
-
-      if (value !== undefined) {
-        update[`social.${field}`] = normalizeString(value, `social.${field}`)
-      }
-    }
-  }
+  const update = buildProfileUpdate(body, {
+    pictureUploadPath,
+    bannerUploadPath,
+  })
 
   try {
     const profile = await Profile.findOneAndUpdate(

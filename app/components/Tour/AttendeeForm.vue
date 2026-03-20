@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { Tour, TourAttendee, TourFormState, TourSocial, TourSponsor } from '~~/types/tour'
+import type { Tour, TourAttendee } from '~~/types/tour'
+import { toEditableTourState } from '~~/app/utils/tour-form'
 
 const props = defineProps<{
   tour: Tour
@@ -29,49 +30,6 @@ function resetDraft() {
   draft.social.instagram = ''
   draft.social.x = ''
   draft.social.tiktok = ''
-}
-
-function cloneSocial(social?: Partial<TourSocial> | null): TourSocial {
-  return {
-    instagram: social?.instagram ?? '',
-    x: social?.x ?? '',
-    tiktok: social?.tiktok ?? '',
-  }
-}
-
-function toEditableTourState(source: Tour): TourFormState {
-  return {
-    name: source.name ?? '',
-    description: source.description ?? '',
-    location: source.location ?? '',
-    date: source.date ? new Date(source.date).toISOString().slice(0, 16) : '',
-    price: source.price ?? 0,
-    attendees: (source.attendees ?? []).map(attendee => ({
-      name: attendee.name ?? '',
-      email: attendee.email ?? '',
-      social: cloneSocial(attendee.social),
-    })),
-    sponsors: (source.sponsors ?? []).map((sponsor: TourSponsor) => ({
-      packageLevel: sponsor.packageLevel ?? '',
-      name: sponsor.name ?? '',
-      logo: sponsor.logo ?? null,
-      website: sponsor.website ?? '',
-      social: cloneSocial(sponsor.social),
-    })),
-    packages: (source.packages ?? []).map(pkg => ({
-      level: Number(pkg.level) || 1,
-      name: pkg.name ?? '',
-      description: pkg.description ?? '',
-      price: Number(pkg.price) || 0,
-      benefits: [...(pkg.benefits ?? [])],
-    })),
-    departure_points: (source.departure_points ?? []).map(point => ({
-      name: point.name ?? '',
-      location: point.location ?? '',
-      dateTime: point?.dateTime ? new Date(point.dateTime).toISOString().slice(0, 16) : '',
-      notes: point.notes ?? '',
-    })),
-  }
 }
 
 async function submit() {

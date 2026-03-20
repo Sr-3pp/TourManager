@@ -1,6 +1,19 @@
 import mongoose from "mongoose";
 
-const ProfileSchema = new mongoose.Schema(
+export type ProfileDocument = {
+  user: mongoose.Types.ObjectId
+  bio: string
+  featured: boolean
+  social: {
+    instagram: string
+    x: string
+    tiktok: string
+  }
+  picture: string | null
+  banner: string | null
+}
+
+const ProfileSchema = new mongoose.Schema<ProfileDocument>(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
@@ -56,4 +69,4 @@ const ProfileSchema = new mongoose.Schema(
 )
 
 export const Profile =
-    (mongoose.models.Profile as mongoose.Model<any>) || mongoose.model('Profile', ProfileSchema)
+    (mongoose.models.Profile as mongoose.Model<ProfileDocument>) || mongoose.model<ProfileDocument>('Profile', ProfileSchema)

@@ -4,41 +4,15 @@ import { Profile } from '~~/server/models/Profile'
 import { User } from '~~/server/models/User'
 import { getAuth, requireUserLevel } from '~~/server/utils/auth'
 import { dbConnect } from '~~/server/utils/db'
+import {
+  normalizeBoolean,
+  normalizeOptionalString,
+  normalizeString,
+} from '~~/server/utils/validation'
 import type { AdminUserUpdateBody } from '~~/types/user'
 
 const MIN_PASSWORD_LENGTH = 8
 const MAX_PASSWORD_LENGTH = 128
-
-function normalizeString(value: unknown, field: string) {
-  if (typeof value !== 'string') {
-    throw createError({
-      statusCode: 400,
-      statusMessage: `${field} must be a string`,
-    })
-  }
-
-  const normalized = value.trim()
-
-  if (!normalized) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: `${field} is required`,
-    })
-  }
-
-  return normalized
-}
-
-function normalizeOptionalString(value: unknown, field: string) {
-  if (typeof value !== 'string') {
-    throw createError({
-      statusCode: 400,
-      statusMessage: `${field} must be a string`,
-    })
-  }
-
-  return value.trim()
-}
 
 function normalizeLevel(value: unknown) {
   const level = Number(value)
@@ -78,17 +52,6 @@ function normalizePassword(value: unknown) {
   return value
 }
 
-function normalizeBoolean(value: unknown, field: string) {
-  if (typeof value !== 'boolean') {
-    throw createError({
-      statusCode: 400,
-      statusMessage: `${field} must be a boolean`,
-    })
-  }
-
-  return value
-}
-
 export default defineEventHandler(async (event) => {
   await requireUserLevel(event, 3)
   await dbConnect()
@@ -108,7 +71,7 @@ export default defineEventHandler(async (event) => {
   let password: string | undefined
 
   if ('name' in body && body.name !== undefined) {
-    userUpdate.name = normalizeString(body.name, 'name')
+    userUpdate.name = normalizeString(body.name, 'name', { required: true })
   }
 
   if ('lastname' in body && body.lastname !== undefined) {
@@ -116,7 +79,7 @@ export default defineEventHandler(async (event) => {
   }
 
   if ('email' in body && body.email !== undefined) {
-    userUpdate.email = normalizeString(body.email, 'email').toLowerCase()
+    userUpdate.email = normalizeString(body.email, 'email', { required: true }).toLowerCase()
   }
 
   if ('level' in body && body.level !== undefined) {

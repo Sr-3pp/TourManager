@@ -1,75 +1,85 @@
-# Nuxt Minimal Starter
+# TourManager
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+TourManager is a Nuxt 4 application for publishing tours, managing organizer profiles, and surfacing featured tours and organizers on a public homepage.
 
-## Setup
+## Stack
 
-Make sure to install dependencies:
+- Nuxt 4 + Vue 3
+- Nuxt UI
+- MongoDB + Mongoose
+- Better Auth
+- Cloudflare R2 compatible blob storage
+- Vitest + Playwright
+
+## Features
+
+- Public homepage with featured tours and featured organizers
+- Organizer profile pages
+- Authenticated organizer profile management
+- Tour creation and editing with packages, attendees, sponsors, and departure points
+- Admin user management
+- SEO metadata, OG image defaults, sitemap, and robots handlers
+
+## Development
+
+Install dependencies:
 
 ```bash
-# npm
-npm install
-
-# pnpm
 pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
 ```
 
-## Development Server
-
-Start the development server on `http://localhost:3000`:
+Start the dev server:
 
 ```bash
-# npm
-npm run dev
-
-# pnpm
 pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
 ```
 
-## Production
-
-Build the application for production:
+Run tests:
 
 ```bash
-# npm
-npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
+pnpm test:unit
+pnpm test:nuxt
+pnpm test:e2e
 ```
 
-Locally preview production build:
+## Environment
+
+The app expects a `.env` file with the following values:
 
 ```bash
-# npm
-npm run preview
+BETTER_AUTH_SECRET=
+NUXT_MONGODB_URI=
+NUXT_MONGODB_DB_NAME=
 
-# pnpm
-pnpm preview
+R2_ACCOUNT_ID=
+R2_ACCESS_KEY_ID=
+R2_SECRET_ACCESS_KEY=
+R2_BUCKET_NAME=
 
-# yarn
-yarn preview
-
-# bun
-bun run preview
+NUXT_PUBLIC_SITE_NAME=Tour Manager
+NUXT_PUBLIC_SITE_URL=http://localhost:3000
+NUXT_PUBLIC_DEFAULT_SEO_DESCRIPTION=Descubre tours destacados y organizadores en Tour Manager.
+NUXT_PUBLIC_DEFAULT_OG_IMAGE=/og/default.svg
 ```
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+## Architecture Notes
+
+- `app/pages`: route containers and SEO orchestration
+- `app/components`: UI sections and forms
+- `app/composables`: feature state and API access
+- `app/utils`: shared client helpers for API calls, display formatting, and form mapping
+- `server/api`: thin route handlers
+- `server/services`: request parsing and domain-specific input assembly
+- `server/utils`: infrastructure helpers such as auth, db, image compression, validation, and R2
+- `server/models`: Mongoose models
+- `types`: shared client/server TypeScript contracts
+
+## Refactor Direction
+
+The codebase is being refactored incrementally with a stability-first approach:
+
+- keep routes and visible behavior stable
+- reduce duplication in server validation and multipart parsing
+- split large tour page/form files into smaller UI sections
+- centralize authenticated fetch behavior on the client
+- improve tests around the extracted shared helpers

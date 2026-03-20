@@ -1,6 +1,56 @@
 import mongoose from 'mongoose'
 
-const TourSchema = new mongoose.Schema(
+export type TourSocialDocument = {
+  instagram: string
+  x: string
+  tiktok: string
+}
+
+export type TourAttendeeDocument = {
+  name: string
+  email: string
+  social: TourSocialDocument
+}
+
+export type TourSponsorDocument = {
+  packageLevel: string
+  name: string
+  logo: string | null
+  website: string
+  social: TourSocialDocument
+}
+
+export type TourPackageDocument = {
+  level: number
+  name: string
+  description: string
+  price: number
+  benefits: string[]
+}
+
+export type TourDeparturePointDocument = {
+  name: string
+  location: string
+  dateTime: Date
+  notes: string
+}
+
+export type TourDocument = {
+  name: string
+  description: string
+  date: Date
+  location: string
+  image: string | null
+  featured: boolean
+  creator: mongoose.Types.ObjectId
+  price: number
+  attendees: TourAttendeeDocument[]
+  sponsors: TourSponsorDocument[]
+  packages: TourPackageDocument[]
+  departure_points: TourDeparturePointDocument[]
+}
+
+const TourSchema = new mongoose.Schema<TourDocument>(
   {
     name: {
         type: String,
@@ -170,4 +220,4 @@ const TourSchema = new mongoose.Schema(
 )
 
 export const Tour =
-  (mongoose.models.Tour as mongoose.Model<any>) || mongoose.model('Tour', TourSchema)
+  (mongoose.models.Tour as mongoose.Model<TourDocument>) || mongoose.model<TourDocument>('Tour', TourSchema)

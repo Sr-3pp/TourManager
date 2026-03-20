@@ -1,4 +1,7 @@
+import type { Ref } from 'vue'
 import type { Tour, TourFormState, TourListResponse, TourResponse, ToursByOrganizerResponse } from '~~/types/tour'
+import { apiFetch, getApiErrorMessage } from '~~/app/utils/api'
+import { buildTourFormData } from '~~/app/utils/tour-form'
 
 export const useTour = () => {
   const toursById = useState<Record<string, Tour>>('tour-tours-by-id', () => ({}))
@@ -21,6 +24,37 @@ export const useTour = () => {
   const errorMessage = ref<string | null>(null)
   const successMessage = ref<string | null>(null)
 
+  const cacheTour = (entry: Tour) => {
+    if (!entry._id) {
+      return
+    }
+
+    toursById.value[entry._id] = entry
+  }
+
+  const cacheTours = (entries: Tour[]) => {
+    for (const entry of entries) {
+      cacheTour(entry)
+    }
+  }
+
+  const syncTourInList = (list: Ref<Tour[]>, savedTour: Tour, prepend = true) => {
+    if (!savedTour._id) {
+      return
+    }
+
+    const index = list.value.findIndex(item => item._id === savedTour._id)
+
+    if (index >= 0) {
+      list.value.splice(index, 1, savedTour)
+      return
+    }
+
+    if (prepend) {
+      list.value.unshift(savedTour)
+    }
+  }
+
   const loadTours = async (options?: { force?: boolean }) => {
     const force = options?.force ?? false
 
@@ -29,17 +63,10 @@ export const useTour = () => {
     }
 
     try {
-      const data = await $fetch<TourListResponse>('/api/tours', {
-        credentials: 'include',
-      })
+      const data = await apiFetch<TourListResponse>('/api/tours')
 
       tours.value = data.tours
-
-      for (const entry of data.tours) {
-        if (entry._id) {
-          toursById.value[entry._id] = entry
-        }
-      }
+      cacheTours(data.tours)
 
       return tours.value
     } catch (error) {
@@ -57,17 +84,10 @@ export const useTour = () => {
     }
 
     try {
-      const data = await $fetch<TourListResponse>('/api/tours/featured', {
-        credentials: 'include',
-      })
+      const data = await apiFetch<TourListResponse>('/api/tours/featured')
 
       featuredTours.value = data.tours
-
-      for (const entry of data.tours) {
-        if (entry._id) {
-          toursById.value[entry._id] = entry
-        }
-      }
+      cacheTours(data.tours)
 
       return featuredTours.value
     } catch (error) {
@@ -95,9 +115,7 @@ export const useTour = () => {
     errorMessage.value = null
 
     try {
-      const data = await $fetch<TourResponse>(`/api/tours/${encodeURIComponent(id)}`, {
-        credentials: 'include',
-      })
+      const data = await apiFetch<TourResponse>(`/api/tours/${encodeURIComponent(id)}`)
 
       toursById.value[id] = data.tour
       return toursById.value[id]
@@ -120,21 +138,6 @@ export const useTour = () => {
     successMessage.value = null
 
     try {
-      const formData = new FormData()
-      formData.append('name', form.name?.trim() ?? '')
-      formData.append('description', form.description?.trim() ?? '')
-      formData.append('location', form.location?.trim() ?? '')
-      formData.append('date', form.date ?? '')
-      formData.append('price', String(form.price ?? 0))
-      formData.append('attendees', JSON.stringify(form.attendees ?? []))
-      formData.append('sponsors', JSON.stringify(form.sponsors ?? []))
-      formData.append('packages', JSON.stringify(form.packages ?? []))
-      formData.append('departure_points', JSON.stringify(form.departure_points ?? []))
-
-      if (files?.imageFile) {
-        formData.append('imageFile', files.imageFile)
-      }
-
       const hasId = Boolean(options?.id)
       const endpoint = hasId
         ? `/api/tours/${encodeURIComponent(String(options?.id || ''))}`
@@ -142,27 +145,18 @@ export const useTour = () => {
 
       const method = hasId ? 'PATCH' : 'POST'
 
-      const data = await $fetch<TourResponse>(endpoint, {
+      const data = await apiFetch<TourResponse>(endpoint, {
         method,
-        credentials: 'include',
-        body: formData,
+        body: buildTourFormData(form, files?.imageFile),
       })
 
       const savedTour = data.tour
       if (savedTour?._id) {
-        toursById.value[savedTour._id] = savedTour
+        cacheTour(savedTour)
         activeTourId.value = savedTour._id
       }
 
-      if (savedTour?._id) {
-        const index = tours.value.findIndex(item => item._id === savedTour._id)
-
-        if (index >= 0) {
-          tours.value.splice(index, 1, savedTour)
-        } else {
-          tours.value.unshift(savedTour)
-        }
-      }
+      syncTourInList(tours, savedTour)
 
       if (savedTour?._id) {
         const featuredIndex = featuredTours.value.findIndex(item => item._id === savedTour._id)
@@ -206,7 +200,7 @@ export const useTour = () => {
       return true
     } catch (error) {
       console.error('Error al guardar el tour:', error)
-      errorMessage.value = error instanceof Error ? error.message : 'No se pudo guardar el tour.'
+      errorMessage.value = getApiErrorMessage(error, 'No se pudo guardar el tour.')
       return false
     } finally {
       isSaving.value = false
@@ -248,16 +242,10 @@ export const useTour = () => {
     }
 
     try {
-      const data = await $fetch<ToursByOrganizerResponse>(`/api/tours/organizer/${encodeURIComponent(organizerId)}`, {
-        credentials: 'include',
-      })
+      const data = await apiFetch<ToursByOrganizerResponse>(`/api/tours/organizer/${encodeURIComponent(organizerId)}`)
       organizerTours.value[organizerId] = data.tours
 
-      for (const tour of data.tours) {
-        if (tour._id) {
-          toursById.value[tour._id] = tour
-        }
-      }
+      cacheTours(data.tours)
 
       return organizerTours.value[organizerId]
     } catch (error) {

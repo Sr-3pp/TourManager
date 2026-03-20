@@ -36,6 +36,32 @@ export function formatTourDate(
   }).format(date)
 }
 
+export function formatDepartureDate(value: string | Date) {
+  const date = new Date(value)
+
+  if (Number.isNaN(date.getTime())) {
+    return String(value)
+  }
+
+  return new Intl.DateTimeFormat(DEFAULT_LOCALE, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(date)
+}
+
+export function getTourCreatorId(tour?: Pick<Tour, 'creator'> | null) {
+  const creator = tour?.creator
+
+  if (!creator) {
+    return ''
+  }
+
+  return typeof creator === 'string' ? creator : String(creator._id || '')
+}
+
 export function getTourOrganizerName(tour: Pick<Tour, 'creator'> | null | undefined) {
   const creator = tour?.creator
 
@@ -48,4 +74,14 @@ export function getTourOrganizerName(tour: Pick<Tour, 'creator'> | null | undefi
   }
 
   return creator.name || creator.username || 'Organizador por confirmar'
+}
+
+export function getTourOrganizerLink(tour?: Pick<Tour, 'creator'> | null) {
+  const creator = tour?.creator
+
+  if (!creator || typeof creator === 'string' || !creator.username) {
+    return null
+  }
+
+  return `/organizer/${creator.username}`
 }
