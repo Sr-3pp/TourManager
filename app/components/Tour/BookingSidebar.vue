@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { TourDeparturePoint, TourPackage } from '~~/types/tour'
+
 defineProps<{
   formattedDate: string
   formattedPrice: string
@@ -6,11 +8,13 @@ defineProps<{
   packageCount: number
   departureCount: number
   location?: string
+  packages: TourPackage[]
+  departurePoints: TourDeparturePoint[]
 }>()
 </script>
 
 <template>
-  <aside class="lg:sticky lg:top-6">
+  <aside class="lg:sticky lg:top-6 flex flex-col gap-6">
     <UCard class="rounded-3xl border-default shadow-sm">
       <div class="space-y-6">
         <div>
@@ -44,5 +48,15 @@ defineProps<{
         </div>
       </div>
     </UCard>
+
+    <TourDetailPackagesCard
+      :packages="packages"
+      :package-count="packageCount"
+    />
+
+    <TourDetailDeparturePointsCard
+      :departure-points="departurePoints"
+      :departure-count="departureCount"
+    />
   </aside>
 </template>

@@ -248,6 +248,8 @@ seo.setJsonLd('tour-structured-data', {
           :package-count="packageCount"
           :departure-count="departureCount"
           :location="tour?.location"
+          :packages="tour?.packages ?? []"
+          :departure-points="tour?.departure_points ?? []"
         />
       </div>
     </UContainer>
