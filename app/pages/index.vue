@@ -143,7 +143,7 @@ seo.setJsonLd('home-structured-data', [
             </div>
 
             <div class="grid gap-3 sm:grid-cols-3">
-              <div class="rounded-2xl bg-muted/40 p-4">
+              <div class="rounded-2xl bg-muted/40 p-4 col-span-3">
                   <p class="text-xs uppercase tracking-[0.18em] text-muted">Organizador</p>
                 <p class="mt-2 font-semibold">{{ featuredOrganizer }}</p>
               </div>
