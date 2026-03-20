@@ -91,16 +91,24 @@ export function useSeo() {
         {
           key,
           type: 'application/ld+json',
-          children: JSON.stringify(nodes.length === 1 ? nodes[0] : nodes),
+          textContent: JSON.stringify(nodes.length === 1 ? nodes[0] : nodes),
         },
       ],
     })
   }
 
   function noIndex() {
-    useSeoMeta({
-      robots: 'noindex, nofollow',
-      googlebot: 'noindex, nofollow',
+    useHead({
+      meta: [
+        {
+          name: 'robots',
+          content: 'noindex, nofollow',
+        },
+        {
+          name: 'googlebot',
+          content: 'noindex, nofollow',
+        },
+      ],
     })
   }
 
