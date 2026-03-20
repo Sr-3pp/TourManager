@@ -90,7 +90,6 @@ defineProps<{
                 <UButton v-if="tour._id" :to="`/tour/${tour._id}`" color="primary">
                   Ver tour
                 </UButton>
-                <UBadge color="primary" variant="soft">Destacado tras el pago</UBadge>
               </div>
             </div>
           </div>
