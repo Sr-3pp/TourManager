@@ -10,6 +10,13 @@ import { dbConnect } from './db'
 
 let authInstance: ReturnType<typeof betterAuth> | null = null
 
+function parseList(value: string | undefined) {
+  return (value ?? '')
+    .split(',')
+    .map(item => item.trim())
+    .filter(Boolean)
+}
+
 export async function ensureProfileForUser(userId: string) {
   await dbConnect()
 
@@ -34,6 +41,10 @@ export async function getAuth() {
     return authInstance
   }
 
+  const runtimeConfig = useRuntimeConfig()
+  const allowedHosts = parseList(runtimeConfig.betterAuthAllowedHosts)
+  const trustedOrigins = parseList(runtimeConfig.betterAuthTrustedOrigins)
+
   // Ensure mongoose connection exists
   await dbConnect()
 
@@ -43,6 +54,14 @@ export async function getAuth() {
   }
 
   const authOptions: BetterAuthOptions = {
+    baseURL: allowedHosts.length > 0
+      ? {
+          allowedHosts,
+          fallback: runtimeConfig.betterAuthUrl || undefined,
+        }
+      : runtimeConfig.betterAuthUrl || undefined,
+    trustedOrigins,
+    secret: runtimeConfig.betterAuthSecret,
     database: mongodbAdapter(db, {
       client: mongoose.connection.getClient(),
       usePlural: true,

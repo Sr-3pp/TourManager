@@ -5,6 +5,15 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     betterAuthSecret: process.env.BETTER_AUTH_SECRET ?? process.env.NUXT_BETTER_AUTH_SECRET ?? '',
+    betterAuthUrl:
+      process.env.BETTER_AUTH_URL ??
+      process.env.NUXT_BETTER_AUTH_URL ??
+      process.env.NUXT_PUBLIC_BETTER_AUTH_URL ??
+      '',
+    betterAuthAllowedHosts:
+      process.env.BETTER_AUTH_ALLOWED_HOSTS ?? process.env.NUXT_BETTER_AUTH_ALLOWED_HOSTS ?? '',
+    betterAuthTrustedOrigins:
+      process.env.BETTER_AUTH_TRUSTED_ORIGINS ?? process.env.NUXT_BETTER_AUTH_TRUSTED_ORIGINS ?? '',
     r2AccessKeyId: process.env.R2_ACCESS_KEY_ID ?? process.env.NUXT_R2_ACCESS_KEY_ID ?? '',
     r2AccountId: process.env.R2_ACCOUNT_ID ?? process.env.NUXT_R2_ACCOUNT_ID ?? '',
     r2BucketName: process.env.R2_BUCKET_NAME ?? process.env.NUXT_R2_BUCKET_NAME ?? '',
