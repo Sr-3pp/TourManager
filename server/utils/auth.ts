@@ -5,6 +5,7 @@ import { mongodbAdapter } from 'better-auth/adapters/mongodb'
 import mongoose from 'mongoose'
 import { Profile } from '~~/server/models/Profile'
 import { User } from '~~/server/models/User'
+import type { ServerAuthSession } from '~~/types/auth'
 import { ensureUsername } from '~~/server/utils/username'
 import { dbConnect } from './db'
 
@@ -114,7 +115,7 @@ export async function getAuth() {
   return authInstance
 }
 
-export async function getSessionWithProfile(event: H3Event) {
+export async function getSessionWithProfile(event: H3Event): Promise<ServerAuthSession | null> {
   const auth = await getAuth()
   const headers = new Headers(
     Object.entries(getHeaders(event)).flatMap(([key, value]) =>
@@ -134,10 +135,17 @@ export async function getSessionWithProfile(event: H3Event) {
   await ensureProfileForUser(session.user.id)
 
   const user = await User.findById(session.user.id).populate('profile')
+  const sessionUserRecord = session.user as Record<string, unknown>
+  const resolvedUser = user
+    ? { ...session.user, ...user.toJSON() }
+    : { ...session.user, level: Number(sessionUserRecord.level ?? 1) }
 
   return {
     ...session,
-    user: user ? { ...session.user, ...user.toJSON() } : session.user,
+    user: {
+      ...resolvedUser,
+      level: Number(resolvedUser.level ?? 1),
+    },
   }
 }
 

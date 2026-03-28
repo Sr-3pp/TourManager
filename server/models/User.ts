@@ -33,7 +33,12 @@ const UserSchema = new mongoose.Schema<UserDocument>(
       sparse: true,
       trim: true,
       lowercase: true,
-    }
+    },
+    level: {
+      type: Number,
+      default: 1,
+      min: 1,
+    },
   },
   {
     collection: 'users',

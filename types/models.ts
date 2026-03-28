@@ -6,6 +6,7 @@ export type UserDocument = {
   email: string
   emailVerified: boolean
   username?: string
+  level: number
 }
 
 export type ProfileDocument = {
