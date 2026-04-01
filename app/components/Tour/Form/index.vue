@@ -56,79 +56,8 @@ const imageFile = ref<File | null>(null)
 const imagePreviewUrl = ref<string | null>(null)
 const localErrorMessage = ref<string | null>(null)
 
-function getNextPackageLevel() {
-	const levels = draft.packages
-		.map(pkg => Number(pkg.level))
-		.filter(level => Number.isFinite(level) && level >= 1)
-
-	return levels.length ? Math.max(...levels) + 1 : 1
-}
-
-function normalizePackageDrafts(packages: TourFormState['packages'] = []) {
-	const usedLevels = new Set<number>()
-
-	return packages.map((pkg) => {
-		const parsedLevel = Number(pkg.level)
-		const hasValidLevel =
-			Number.isInteger(parsedLevel)
-			&& parsedLevel >= 1
-			&& !usedLevels.has(parsedLevel)
-
-		const level = hasValidLevel
-			? parsedLevel
-			: (() => {
-				let nextLevel = 1
-
-				while (usedLevels.has(nextLevel)) {
-					nextLevel += 1
-				}
-
-				return nextLevel
-			})()
-
-		usedLevels.add(level)
-
-		return {
-			...pkg,
-			level,
-		}
-	})
-}
-
-function addPackage() {
-	draft.packages.push({
-		level: getNextPackageLevel(),
-		name: '',
-		description: '',
-		price: 0,
-		benefits: [],
-	})
-}
-
-function removePackage(index: number) {
-	draft.packages.splice(index, 1)
-}
-
-function addBenefit(packageIndex: number) {
-	draft.packages[packageIndex]?.benefits.push('')
-}
-
-function removeBenefit(packageIndex: number, benefitIndex: number) {
-	draft.packages[packageIndex]?.benefits.splice(benefitIndex, 1)
-}
-
-function addDeparturePoint() {
-	draft.departure_points.push({
-		name: '',
-		location: '',
-		dateTime: '',
-		notes: '',
-	})
-}
-
-function removeDeparturePoint(index: number) {
-	draft.departure_points.splice(index, 1)
-}
+const isEditing = computed(() => Boolean(props.tourId))
+const submitLabel = computed(() => isEditing.value ? 'Actualizar tour' : 'Crear tour')
 
 const initialValues = computed<TourFormInitialValues>(() => toTourFormInitialValues(tour.value as Tour | undefined))
 
@@ -137,13 +66,17 @@ const currentImageUrl = computed(() => {
 	return image ? `/blob/${image}` : ''
 })
 
-function resetDraft() {
-	mapInitialValuesToTourDraft(draft, createEmptyTourFormState())
-	imageFile.value = null
+function clearImagePreview() {
 	if (imagePreviewUrl.value) {
 		URL.revokeObjectURL(imagePreviewUrl.value)
 		imagePreviewUrl.value = null
 	}
+}
+
+function resetDraft() {
+	mapInitialValuesToTourDraft(draft, createEmptyTourFormState())
+	imageFile.value = null
+	clearImagePreview()
 }
 
 watch(
@@ -156,8 +89,7 @@ watch(
 
 watch(imageFile, (file, previousFile) => {
 	if (imagePreviewUrl.value && previousFile) {
-		URL.revokeObjectURL(imagePreviewUrl.value)
-		imagePreviewUrl.value = null
+		clearImagePreview()
 	}
 
 	if (!file) {
@@ -172,55 +104,52 @@ watch(imageFile, (file, previousFile) => {
 	}
 
 	localErrorMessage.value = null
-
-	if (file) {
-		imagePreviewUrl.value = URL.createObjectURL(file)
-	}
+	imagePreviewUrl.value = URL.createObjectURL(file)
 })
 
 onBeforeUnmount(() => {
-	if (imagePreviewUrl.value) {
-		URL.revokeObjectURL(imagePreviewUrl.value)
-	}
+	clearImagePreview()
 })
 
-function onSubmit(event: FormSubmitEvent<TourFormState>) {
-	saveTour(
+async function onSubmit(event: FormSubmitEvent<TourFormState>) {
+	const ok = await saveTour(
 		event.data,
 		{ imageFile: imageFile.value },
 		{ id: props.tourId },
-	).then((ok) => {
-		if (ok) {
-			if (props.tourId) {
-				imageFile.value = null
-			} else {
-				resetDraft()
-				resetTourFormState()
-			}
+	)
 
-			emit('saved')
-		}
-	})
-}
-
-async function reloadForm() {
-	if (!props.tourId) {
-		mapInitialValuesToTourDraft(draft, createEmptyTourFormState())
-		imageFile.value = null
+	if (!ok) {
 		return
 	}
 
-	await loadTour(props.tourId, { force: true })
+	if (isEditing.value) {
+		imageFile.value = null
+	} else {
+		resetDraft()
+		resetTourFormState()
+	}
+
+	emit('saved')
+}
+
+async function reloadForm() {
+	if (!isEditing.value) {
+		resetDraft()
+		localErrorMessage.value = null
+		return
+	}
+
+	await loadTour(props.tourId as string, { force: true })
 }
 
 onMounted(async () => {
-	if (!props.tourId) {
+	if (!isEditing.value) {
 		resetTourFormState()
 		resetDraft()
 		return
 	}
 
-	await loadTour(props.tourId)
+	await loadTour(props.tourId as string)
 })
 </script>
 
@@ -240,39 +169,28 @@ onMounted(async () => {
 			:title="successMessage"
 		/>
 
-		<UForm :schema="tourSchema" :state="draft" class="space-y-4 grid grid-cols-1 md:grid-cols-2 gap-4" @submit="onSubmit">
-			<fieldset class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+		<UForm :schema="tourSchema" :state="draft" class="space-y-6" @submit="onSubmit">
+			<div class="grid grid-cols-1 gap-4 xl:grid-cols-[1.05fr_1.4fr]">
 				<TourFormImageField
 					v-model="imageFile"
 					:current-image-url="currentImageUrl"
 					:image-preview-url="imagePreviewUrl"
 				/>
-	
 				<TourFormBasics :draft="draft" />
-			</fieldset>
+			</div>
 
-			<fieldset class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-				<TourFormPackages
-					:packages="draft.packages"
-					@add-package="addPackage"
-					@remove-package="removePackage"
-					@add-benefit="addBenefit"
-					@remove-benefit="removeBenefit"
-				/>
-	
-				<TourFormDeparturePoints
-					:departure-points="draft.departure_points"
-					@add-departure-point="addDeparturePoint"
-					@remove-departure-point="removeDeparturePoint"
-				/>
-			</fieldset>
+			<USeparator />
 
+			<div class="grid grid-cols-1 gap-4 xl:grid-cols-2">
+				<TourFormPackages v-model="draft.packages" />
+				<TourFormDeparturePoints v-model="draft.departure_points" />
+			</div>
 
-			<div class="flex gap-3">
-				<UButton type="submit" :loading="isSaving">{{ props.tourId ? 'Actualizar tour' : 'Crear tour' }}</UButton>
+			<div class="flex flex-wrap items-center justify-end gap-3">
 				<UButton type="button" color="neutral" variant="soft" :disabled="isSaving || isLoading" @click="reloadForm">
 					Recargar
 				</UButton>
+				<UButton type="submit" :loading="isSaving">{{ submitLabel }}</UButton>
 			</div>
 		</UForm>
 	</div>

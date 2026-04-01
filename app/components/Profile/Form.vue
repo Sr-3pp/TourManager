@@ -91,61 +91,97 @@ onMounted(() => syncDraft())
             class="space-y-4"
             @submit="onSubmit"
         >
-            <UFormField name="banner" label="Banner (máx. 10 MB)" class="relative">
-                <UFileUpload
-                    v-model="bannerFile"
-                    class="w-full relative z-10"
-                    accept="image/*"
-                    :preview="false"
-                    label="Selecciona un banner"
-                    description="PNG, JPG o WEBP de hasta 10 MB"
-                    :ui="{ base: 'bg-gradient-to-t from-[var(--ui-bg-muted)] to-transparent' }"
-                />
-                <NuxtImg
-                    v-if="profile?.banner"
-                    :src="`/blob/${profile.banner}`"
-                    alt="Banner actual"
-                    class="h-full w-full rounded-md border object-cover absolute inset-0 opacity-50"
-                />
-            </UFormField>
+            <UCard>
+                <div class="space-y-5">
+                    <FormSectionHeader
+                        title="Identidad visual"
+                        description="Actualiza el banner y la foto que representan tu perfil público."
+                        badge="Media"
+                        badge-color="secondary"
+                    />
 
-            <UFormField name="picture" label="Foto de perfil (máx. 10 MB)">
-                <UFileUpload
-                    v-model="pictureFile"
-                    class="w-full relative z-10"
-                    accept="image/*"
-                    :preview="false"
-                    label="Selecciona una foto"
-                    description="PNG, JPG o WEBP de hasta 10 MB"
-                    :ui="{ base: 'bg-gradient-to-t from-[var(--ui-bg-muted)] to-transparent' }"
-                />
-                <NuxtImg
-                    v-if="profile?.picture"
-                    :src="`/blob/${profile.picture}`"
-                    alt="Foto de perfil actual"
-                    class="h-full w-full rounded-md border object-cover absolute inset-0 opacity-50"
-                />
-            </UFormField>
+                    <div class="flex flex-col gap-6">
+                        <UFormField name="banner" label="Banner (máx. 10 MB)" class="relative">
+                                <UFileUpload
+                                    v-model="bannerFile"
+                                    class="w-full relative z-10 h-full"
+                                    accept="image/*"
+                                    :preview="false"
+                                    label="Selecciona un banner"
+                                    description="PNG, JPG o WEBP de hasta 10 MB"
+                                    :ui="{ base: 'bg-gradient-to-t from-[var(--ui-bg-muted)] to-transparent' }"
+                                />
+                                <NuxtImg
+                                    v-if="profile?.banner"
+                                    :src="`/blob/${profile.banner}`"
+                                    alt="Banner actual"
+                                    class="absolute inset-0 h-full w-full object-cover rounded-lg"
+                                />
+                        </UFormField>
 
-            <UFormField name="bio" label="Biografía">
-                <UTextarea class="w-full" v-model="draft.bio" :rows="4" placeholder="Cuéntale a la gente sobre tu trabajo..." />
-            </UFormField>
+                        <div class="flex gap-4 items-center">
+                            <NuxtImg
+                                v-if="profile?.picture"
+                                :src="`/blob/${profile.picture}`"
+                                alt="Foto de perfil actual"
+                                class="h-28 w-28 rounded-full object-cover flex-shrink-0"
+                            />
+                            <UFormField name="picture" label="Foto de perfil (máx. 10 MB)" class="w-full">
+                                    <UFileUpload
+                                        v-model="pictureFile"
+                                        class="w-full"
+                                        accept="image/*"
+                                        :preview="false"
+                                        label="Selecciona una foto"
+                                        description="PNG, JPG o WEBP de hasta 10 MB"
+                                        :ui="{ base: 'bg-gradient-to-t from-[var(--ui-bg-muted)] to-transparent' }"
+                                    />
+    
+                                </UFormField>
+                        </div>
 
-            <fieldset class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <legend class="col-span-full">Redes sociales</legend>
+                    </div>
+                </div>
+            </UCard>
 
-                <UFormField name="instagram" label="Instagram">
-                    <UInput v-model="draft.instagram" placeholder="@tuusuario" />
-                </UFormField>
+            <UCard>
+                <div class="space-y-5">
+                    <FormSectionHeader
+                        title="Perfil público"
+                        description="Define tu presentación y los enlaces sociales que verán los viajeros."
+                        badge="Perfil"
+                        badge-color="primary"
+                    />
 
-                <UFormField name="x" label="X">
-                    <UInput v-model="draft.x" placeholder="@tuusuario" />
-                </UFormField>
+                    <UFormField name="bio" label="Biografía">
+                        <UTextarea class="w-full" v-model="draft.bio" :rows="5" placeholder="Cuéntale a la gente sobre tu trabajo..." />
+                    </UFormField>
 
-                <UFormField name="tiktok" label="TikTok">
-                    <UInput v-model="draft.tiktok" placeholder="@tuusuario" />
-                </UFormField>
-            </fieldset>
+                    <USeparator />
+
+                    <div class="space-y-3">
+                        <FormSectionHeader
+                            title="Redes sociales"
+                            description="Comparte tus canales principales para que te encuentren con facilidad."
+                            badge="3 campos"
+                        />
+
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <UFormField name="instagram" label="Instagram">
+                                <UInput v-model="draft.instagram" placeholder="@tuusuario" class="w-full" />
+                            </UFormField>
+
+                            <UFormField name="x" label="X">
+                                <UInput v-model="draft.x" placeholder="@tuusuario" class="w-full" />
+                            </UFormField>
+
+                            <UFormField name="tiktok" label="TikTok" class="sm:col-span-2">
+                                <UInput v-model="draft.tiktok" placeholder="@tuusuario" class="w-full" />
+                            </UFormField>
+                        </div>
+                    </div>
+                </div>
+            </UCard>
 
             <div class="flex gap-3 justify-end">
                 <UButton type="submit" :loading="isSaving" :disabled="isLoading">Guardar perfil</UButton>

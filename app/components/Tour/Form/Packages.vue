@@ -1,84 +1,99 @@
 <script setup lang="ts">
 import type { TourFormState } from '~~/types/tour'
 
-defineProps<{
-  packages: TourFormState['packages']
-}>()
+const packages = defineModel<TourFormState['packages']>({ default: () => [] })
 
-defineEmits<{
-  addPackage: []
-  removePackage: [index: number]
-  addBenefit: [packageIndex: number]
-  removeBenefit: [packageIndex: number, benefitIndex: number]
-}>()
+function getNextPackageLevel() {
+  const levels = packages.value
+    .map(pkg => Number(pkg.level))
+    .filter(level => Number.isFinite(level) && level >= 1)
+
+  return levels.length ? Math.max(...levels) + 1 : 1
+}
+
+function addPackage() {
+  packages.value.push({
+    level: getNextPackageLevel(),
+    name: '',
+    description: '',
+    price: 0,
+    benefits: [],
+  })
+}
+
+function removePackage(index: number) {
+  packages.value.splice(index, 1)
+}
 </script>
 
 <template>
-  <UCard class="col-span-2">
-    <div class="flex items-center justify-between">
-      <h3 class="text-sm font-semibold">Paquetes</h3>
-      <UButton type="button" size="sm" variant="soft" @click="$emit('addPackage')">Agregar paquete</UButton>
-    </div>
-
-    <UPageList as="ul" divide class="mt-4">
-      <li
-        v-for="(pkg, packageIndex) in packages"
-        :key="`package-${packageIndex}`"
-        class="list-none py-4 first:pt-0 last:pb-0"
+  <UCard class="h-full">
+    <div class="space-y-5">
+      <FormSectionHeader
+        title="Paquetes"
+        description="Define niveles, precio y beneficios sin salir de la misma sección."
       >
-        <div class="space-y-3">
-          <div class="flex justify-between gap-3">
-            <p class="text-sm font-medium text-muted">Paquete {{ packageIndex + 1 }}</p>
-            <UButton
-              type="button"
-              size="xs"
-              color="error"
-              variant="ghost"
-              @click="$emit('removePackage', packageIndex)"
-            >
-              Eliminar
-            </UButton>
-          </div>
-          <div class="grid gap-2 md:grid-cols-2">
-            <UFormField name="Nombre del paquete" label="Nombre del paquete">
-              <UInput v-model="pkg.name" placeholder="Bronce" />
-            </UFormField>
-            <UFormField name="Precio del paquete" label="Precio del paquete">
-              <UInput v-model.number="pkg.price" type="number" min="0" step="0.01" placeholder="Precio" />
-            </UFormField>
-            <UFormField name="Descripción del paquete" label="Descripción del paquete" class="col-span-2">
-              <UTextarea v-model="pkg.description" class="w-full" :rows="2" placeholder="Descripción del paquete" />
-            </UFormField>
-          </div>
+        <template #meta>
+          <UBadge color="neutral" variant="soft">{{ packages.length }} opciones</UBadge>
+        </template>
+      </FormSectionHeader>
 
-          <div class="space-y-2">
-            <div class="flex items-center justify-between">
-              <p class="text-xs font-medium">Beneficios</p>
-              <UButton type="button" size="xs" variant="soft" @click="$emit('addBenefit', packageIndex)">
-                Agregar beneficio
-              </UButton>
-            </div>
-            <div
-              v-for="(_benefit, benefitIndex) in pkg.benefits"
-              :key="`benefit-${packageIndex}-${benefitIndex}`"
-              class="flex gap-2"
-            >
-              <UFormField :name="`Beneficio ${benefitIndex + 1}`" :label="`Beneficio ${benefitIndex + 1}`" class="flex-1">
-                <UInput v-model="pkg.benefits[benefitIndex]" placeholder="Beneficio" />
-              </UFormField>
+      <UButton type="button" size="sm" variant="soft" icon="i-lucide-plus" @click="addPackage">
+        Agregar paquete
+      </UButton>
+
+      <div v-if="!packages.length" class="rounded-lg border border-dashed border-default px-4 py-8 text-center text-sm text-muted">
+        Aún no hay paquetes creados. Agrega uno para ofrecer distintos niveles de experiencia.
+      </div>
+
+      <div v-else class="space-y-4">
+        <UCard
+          v-for="(pkg, packageIndex) in packages"
+          :key="`package-${packageIndex}`"
+          variant="subtle"
+        >
+          <div class="space-y-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex items-center gap-2">
+                <UBadge color="primary" variant="soft">Nivel {{ pkg.level }}</UBadge>
+                <p class="text-sm font-medium text-highlighted">Paquete {{ packageIndex + 1 }}</p>
+              </div>
               <UButton
                 type="button"
                 size="xs"
                 color="error"
                 variant="ghost"
-                @click="$emit('removeBenefit', packageIndex, benefitIndex)"
+                icon="i-lucide-trash-2"
+                @click="removePackage(packageIndex)"
               >
                 Eliminar
               </UButton>
             </div>
+
+            <div class="grid gap-4 md:grid-cols-2">
+              <UFormField :name="`package-name-${packageIndex}`" label="Nombre del paquete">
+                <UInput v-model="pkg.name" placeholder="Bronce" />
+              </UFormField>
+
+              <UFormField :name="`package-price-${packageIndex}`" label="Precio del paquete">
+                <UInput v-model.number="pkg.price" type="number" min="0" step="0.01" placeholder="Precio" />
+              </UFormField>
+
+              <UFormField :name="`package-description-${packageIndex}`" label="Descripción" class="md:col-span-2">
+                <UTextarea v-model="pkg.description" class="w-full" :rows="3" placeholder="Qué incluye este paquete" />
+              </UFormField>
+
+              <UFormField :name="`package-benefits-${packageIndex}`" label="Beneficios" class="md:col-span-2">
+                <UInputTags
+                  v-model="pkg.benefits"
+                  class="w-full"
+                  placeholder="Escribe un beneficio y presiona Enter"
+                />
+              </UFormField>
+            </div>
           </div>
-        </div>
-      </li>
-    </UPageList>
+        </UCard>
+      </div>
+    </div>
   </UCard>
 </template>
