@@ -15,7 +15,7 @@ defineProps<{
 
 <template>
   <aside class="lg:sticky lg:top-6 flex flex-col gap-6">
-    <UCard class="rounded-3xl border-default shadow-sm">
+    <UCard class="rounded-3xl border-default shadow-sm" variant="soft">
       <div class="space-y-6">
         <div>
           <p class="text-sm font-medium uppercase tracking-[0.18em] text-primary">Resumen del tour</p>

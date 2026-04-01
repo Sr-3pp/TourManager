@@ -64,7 +64,7 @@ const socialNetworks = computed(() => props.profile?.social ?? null)
       </div>
 
       <div class="grid gap-6 lg:grid-cols-[minmax(0,1.35fr)_360px]">
-        <UCard class="rounded-3xl">
+        <UCard class="rounded-3xl" variant="soft">
           <div class="space-y-4">
             <div>
               <p class="text-sm font-medium uppercase tracking-[0.18em] text-primary">Acerca de</p>
@@ -77,7 +77,7 @@ const socialNetworks = computed(() => props.profile?.social ?? null)
           </div>
         </UCard>
 
-        <UCard class="rounded-3xl">
+        <UCard class="rounded-3xl" variant="soft">
           <div class="space-y-4">
             <div>
               <p class="text-sm font-medium uppercase tracking-[0.18em] text-primary">Social</p>
@@ -109,6 +109,7 @@ const socialNetworks = computed(() => props.profile?.social ?? null)
           loop
           class="pb-10"
           :ui="{
+            container: 'p-4',
             item: 'basis-full md:basis-1/2 xl:basis-1/3',
             prev: 'start-4 top-1/2',
             next: 'end-4 top-1/2',
@@ -119,7 +120,7 @@ const socialNetworks = computed(() => props.profile?.social ?? null)
             <TourCard :tour="tour" />
           </template>
         </UCarousel>
-        <UCard v-else class="rounded-3xl border-dashed">
+        <UCard v-else class="rounded-3xl border-dashed" variant="soft">
           <p class="text-sm text-muted">Aún no se han publicado tours.</p>
         </UCard>
       </div>

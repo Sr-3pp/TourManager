@@ -58,7 +58,7 @@ defineEmits<{
     </div>
 
     <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      <UCard>
+      <UCard variant="soft">
         <div class="flex items-start justify-between gap-4">
           <div>
             <p class="text-sm text-muted">Asistentes</p>
@@ -67,7 +67,7 @@ defineEmits<{
           <UIcon name="i-lucide-users" class="mt-1 text-2xl text-primary" />
         </div>
       </UCard>
-      <UCard>
+      <UCard variant="soft">
         <div class="flex items-start justify-between gap-4">
           <div>
             <p class="text-sm text-muted">Patrocinadores</p>
@@ -76,7 +76,7 @@ defineEmits<{
           <UIcon name="i-lucide-badge-dollar-sign" class="mt-1 text-2xl text-primary" />
         </div>
       </UCard>
-      <UCard>
+      <UCard variant="soft">
         <div class="flex items-start justify-between gap-4">
           <div>
             <p class="text-sm text-muted">Paquetes</p>
@@ -85,7 +85,7 @@ defineEmits<{
           <UIcon name="i-lucide-package" class="mt-1 text-2xl text-primary" />
         </div>
       </UCard>
-      <UCard>
+      <UCard variant="soft">
         <div class="flex items-start justify-between gap-4">
           <div>
             <p class="text-sm text-muted">Salidas</p>

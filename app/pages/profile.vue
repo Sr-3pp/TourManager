@@ -44,15 +44,15 @@ useSeoMeta({
         </template>
     </ProfileShowcase>
 
-    <UModal v-model:open="profileModal" title="Editar perfil">
+    <UDrawer v-model:open="profileModal" title="Editar perfil" description="Actualiza los detalles públicos de tu perfil de organizador." direction="left">
         <template #body>
             <ProfileForm />
         </template>
-    </UModal>
+    </UDrawer>
 
-    <UModal v-model:open="tourModal" title="Crear tour">
+    <UDrawer v-model:open="tourModal" title="Crear tour" description="Crea o actualiza los detalles de tu tour." direction="bottom">
         <template #body>
             <TourForm @saved="tourModal = false" />
         </template>
-    </UModal>
+    </UDrawer>
 </template>

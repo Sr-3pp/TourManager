@@ -7,7 +7,7 @@ defineProps<{
 </script>
 
 <template>
-  <div class="contents">
+  <fieldset class="contents">
     <UFormField name="name" label="Nombre del tour" class="col-span-2 md:col-span-1">
       <UInput v-model="draft.name" class="w-full" placeholder="Aventura increíble por los Andes" />
     </UFormField>
@@ -34,5 +34,5 @@ defineProps<{
         placeholder="Precio"
       />
     </UFormField>
-  </div>
+  </fieldset>
 </template>

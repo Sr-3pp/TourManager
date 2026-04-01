@@ -1,17 +1,22 @@
 <script setup lang="ts">
+const imageFile = defineModel<File | null>({ default: null })
+
 defineProps<{
   currentImageUrl?: string
   imagePreviewUrl?: string | null
-}>()
-
-defineEmits<{
-  change: [event: Event]
 }>()
 </script>
 
 <template>
   <UFormField name="image" label="Imagen del tour (máx. 10 MB)" class="col-span-2">
-    <UInput class="w-full" type="file" accept="image/*" @change="(event) => $emit('change', event)" />
+    <UFileUpload
+      v-model="imageFile"
+      class="w-full"
+      accept="image/*"
+      :preview="false"
+      label="Selecciona una imagen"
+      description="PNG, JPG o WEBP de hasta 10 MB"
+    />
     <div class="mt-2">
       <img
         v-if="imagePreviewUrl"

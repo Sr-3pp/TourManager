@@ -274,7 +274,7 @@ seo.setJsonLd('tour-structured-data', {
 
     <UModal v-model:open="addSponsorModal" title="Agregar patrocinador">
       <template #body>
-        <TourSponsorForm
+        <TourFormSponsor
           ref="sponsorFormRef"
           :tour="tour!"
           :tour-id="id"

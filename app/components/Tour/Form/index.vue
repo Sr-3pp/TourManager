@@ -160,6 +160,19 @@ watch(imageFile, (file, previousFile) => {
 		imagePreviewUrl.value = null
 	}
 
+	if (!file) {
+		localErrorMessage.value = null
+		return
+	}
+
+	if (file.size > TOUR_MAX_UPLOAD_SIZE_BYTES) {
+		localErrorMessage.value = 'La imagen del tour debe pesar menos de 10 MB.'
+		imageFile.value = null
+		return
+	}
+
+	localErrorMessage.value = null
+
 	if (file) {
 		imagePreviewUrl.value = URL.createObjectURL(file)
 	}
@@ -170,26 +183,6 @@ onBeforeUnmount(() => {
 		URL.revokeObjectURL(imagePreviewUrl.value)
 	}
 })
-
-function onImageChange(event: Event) {
-	localErrorMessage.value = null
-	const target = event.target as HTMLInputElement
-	const file = target.files?.[0] ?? null
-
-	if (!file) {
-		imageFile.value = null
-		return
-	}
-
-	if (file.size > TOUR_MAX_UPLOAD_SIZE_BYTES) {
-		localErrorMessage.value = 'La imagen del tour debe pesar menos de 10 MB.'
-		imageFile.value = null
-		target.value = ''
-		return
-	}
-
-	imageFile.value = file
-}
 
 function onSubmit(event: FormSubmitEvent<TourFormState>) {
 	saveTour(
@@ -232,12 +225,7 @@ onMounted(async () => {
 </script>
 
 <template>
-	<div class="max-w-2xl space-y-4">
-		<div class="space-y-1">
-			<h2 class="text-xl font-semibold">{{ props.tourId ? 'Editar tour' : 'Crear tour' }}</h2>
-			<p class="text-sm text-gray-600">Crea o actualiza los detalles de tu tour.</p>
-		</div>
-
+	<div class="w-full space-y-4">
 		<UAlert
 			v-if="errorMessage || localErrorMessage"
 			color="error"
@@ -253,27 +241,32 @@ onMounted(async () => {
 		/>
 
 		<UForm :schema="tourSchema" :state="draft" class="space-y-4 grid grid-cols-1 md:grid-cols-2 gap-4" @submit="onSubmit">
-			<TourFormBasics :draft="draft" />
+			<fieldset class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+				<TourFormImageField
+					v-model="imageFile"
+					:current-image-url="currentImageUrl"
+					:image-preview-url="imagePreviewUrl"
+				/>
+	
+				<TourFormBasics :draft="draft" />
+			</fieldset>
 
-			<TourFormImageField
-				:current-image-url="currentImageUrl"
-				:image-preview-url="imagePreviewUrl"
-				@change="onImageChange"
-			/>
+			<fieldset class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+				<TourFormPackages
+					:packages="draft.packages"
+					@add-package="addPackage"
+					@remove-package="removePackage"
+					@add-benefit="addBenefit"
+					@remove-benefit="removeBenefit"
+				/>
+	
+				<TourFormDeparturePoints
+					:departure-points="draft.departure_points"
+					@add-departure-point="addDeparturePoint"
+					@remove-departure-point="removeDeparturePoint"
+				/>
+			</fieldset>
 
-			<TourFormPackages
-				:packages="draft.packages"
-				@add-package="addPackage"
-				@remove-package="removePackage"
-				@add-benefit="addBenefit"
-				@remove-benefit="removeBenefit"
-			/>
-
-			<TourFormDeparturePoints
-				:departure-points="draft.departure_points"
-				@add-departure-point="addDeparturePoint"
-				@remove-departure-point="removeDeparturePoint"
-			/>
 
 			<div class="flex gap-3">
 				<UButton type="submit" :loading="isSaving">{{ props.tourId ? 'Actualizar tour' : 'Crear tour' }}</UButton>

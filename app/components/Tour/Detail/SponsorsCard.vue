@@ -20,7 +20,7 @@ function packageLabelByLevel(level: string) {
 </script>
 
 <template>
-  <UCard class="rounded-3xl">
+  <UCard class="rounded-3xl" variant="soft">
     <div class="flex items-center justify-between gap-4">
       <div>
         <p class="text-sm font-medium uppercase tracking-[0.18em] text-primary">Patrocinadores</p>
