@@ -182,8 +182,8 @@ seo.setJsonLd('home-structured-data', [
         </div>
 
         <div class="grid gap-6 lg:grid-cols-3 lg:items-start">
-          <HomeFeaturedOrganizersPanel :organizers="featuredOrganizers" />
-          <HomeFeaturedToursPanel :tours="featuredTours" />
+          <OrganizerFeaturedCarousel :organizers="featuredOrganizers" />
+          <TourFeaturedCarousel :tours="featuredTours" />
         </div>
       </div>
     </UContainer>
