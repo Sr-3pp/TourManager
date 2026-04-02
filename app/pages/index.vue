@@ -169,17 +169,7 @@ seo.setJsonLd('home-structured-data', [
       </div>
 
       <div id="tour-showcase" class="mt-12 space-y-6 scroll-mt-28 sm:mt-16">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p class="text-sm font-medium uppercase tracking-[0.18em] text-primary">
-              Promociones pagadas en portada
-            </p>
-            <h2 class="mt-2 text-3xl font-semibold tracking-tight">Organizadores y tours destacados</h2>
-          </div>
-          <p class="max-w-2xl text-sm leading-6 text-muted">
-            Explora perfiles de organizadores, tours activos y experiencias destacadas desde un solo escaparate público.
-          </p>
-        </div>
+        <h2 class="mt-2 text-3xl font-semibold tracking-tight">Organizadores y tours destacados</h2>
 
         <div class="grid gap-6 lg:grid-cols-3 lg:items-start">
           <OrganizerFeaturedCarousel :organizers="featuredOrganizers" />

@@ -9,19 +9,11 @@ defineProps<{
 <template>
   <UCard class="overflow-hidden rounded-[2rem]">
     <div class="space-y-6 p-1">
-      <div class="flex flex-col gap-3 px-5 pt-5 sm:px-6 sm:pt-6">
-        <p class="text-sm font-medium uppercase tracking-[0.18em] text-primary">
-          Promociones pagadas de tours
-        </p>
-        <div class="flex flex-col gap-2">
-          <h3 class="text-2xl font-semibold tracking-tight">Tours destacados</h3>
-          <p class="text-sm leading-6 text-muted">
-            Los tours destacados rotan en este panel después de haberse vendido como espacios en portada.
-          </p>
-          <div>
-            <UBadge color="primary" variant="soft">{{ tours.length }} activos</UBadge>
-          </div>
-        </div>
+      <div class="flex gap-3 px-5 sm:px-6">
+          <h3 class="text-sm font-medium uppercase tracking-[0.18em] text-primary">
+            Tours Destacados
+          </h3>
+          <UBadge color="primary" variant="soft" class="ml-auto">{{ tours.length }} activos</UBadge>
       </div>
 
       <UCarousel
@@ -30,8 +22,8 @@ defineProps<{
         arrows
         dots
         loop
-        class="px-5 pb-10 sm:px-6 sm:pb-12"
         :ui="{
+          root: 'px-0',
           container: 'p-2',
           item: 'basis-full self-stretch',
           prev: 'start-6 top-32',

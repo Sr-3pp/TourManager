@@ -9,17 +9,11 @@ defineProps<{
 <template>
   <UCard class="overflow-hidden rounded-[2rem] lg:col-span-2">
     <div class="space-y-6 p-1">
-      <div class="flex flex-col gap-3 px-5 pt-5 sm:px-6 sm:pt-6">
-        <p class="text-sm font-medium uppercase tracking-[0.18em] text-primary">
-          Promociones pagadas de organizadores
-        </p>
+      <div class="flex flex-col gap-3 px-5 sm:px-6">
         <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h3 class="text-2xl font-semibold tracking-tight">Organizadores destacados</h3>
-            <p class="mt-2 max-w-2xl text-sm leading-6 text-muted">
-              Aquí solo se muestran los organizadores marcados como destacados después del pago.
-            </p>
-          </div>
+          <h3 class="text-sm font-medium uppercase tracking-[0.18em] text-primary">
+            Organizadores destacados
+          </h3>
           <UBadge color="secondary" variant="soft">{{ organizers.length }} activos</UBadge>
         </div>
       </div>
@@ -30,7 +24,6 @@ defineProps<{
         arrows
         dots
         loop
-        class="px-5 pb-10 sm:px-6 sm:pb-12"
         :ui="{
           container: 'p-2',
           item: 'basis-full lg:basis-1/2 self-stretch',
