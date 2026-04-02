@@ -32,7 +32,8 @@ defineProps<{
         loop
         class="px-5 pb-10 sm:px-6 sm:pb-12"
         :ui="{
-          item: 'basis-full',
+          container: 'p-2',
+          item: 'basis-full self-stretch',
           prev: 'start-6 top-32',
           next: 'end-6 top-32',
           dots: 'relative inset-auto justify-start pt-4'
