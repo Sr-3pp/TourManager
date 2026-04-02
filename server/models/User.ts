@@ -1,11 +1,16 @@
 import mongoose from 'mongoose'
-import mongooseBcrypt from 'mongoose-bcrypt'
+import type { UserDocument } from '~~/types/models'
 
-const UserSchema = new mongoose.Schema(
+const UserSchema = new mongoose.Schema<UserDocument>(
   {
     name: {
       type: String,
       required: true,
+      trim: true,
+    },
+    lastname: {
+      type: String,
+      default: '',
       trim: true,
     },
     email: {
@@ -21,14 +26,19 @@ const UserSchema = new mongoose.Schema(
       required: true,
       default: false,
     },
-    slug: {
-        type: String,
-        unique: true,
-        index: true,
+    username: {
+      type: String,
+      unique: true,
+      index: true,
       sparse: true,
-        trim: true,
-        lowercase: true,
-    }
+      trim: true,
+      lowercase: true,
+    },
+    level: {
+      type: Number,
+      default: 1,
+      min: 1,
+    },
   },
   {
     collection: 'users',
@@ -54,7 +64,5 @@ UserSchema.virtual('profile', {
   justOne: true,
 })
 
-UserSchema.plugin(mongooseBcrypt)
-
 export const User =
-  (mongoose.models.User as mongoose.Model<any>) || mongoose.model('User', UserSchema)
+  (mongoose.models.User as mongoose.Model<UserDocument>) || mongoose.model<UserDocument>('User', UserSchema)

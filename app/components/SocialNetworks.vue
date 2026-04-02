@@ -3,6 +3,7 @@ import type { SocialNetworkKey, SocialNetworks } from '~~/types/social'
 
 const props = defineProps<{
     socialNetworks: SocialNetworks
+    onlyIcons?: boolean
 }>()
 
 const iconMap: Record<SocialNetworkKey, { icon: string; urlPrefix: string }> = {
@@ -39,7 +40,7 @@ const visibleNetworks = computed(() =>
                     class="inline-flex items-center gap-2 rounded-full border border-default bg-secondary/10 px-4 py-2 text-sm font-medium text-secondary transition hover:bg-secondary/15"
                 >
                     <UIcon :name="iconMap[network].icon" class="text-base" />
-                    <span class="capitalize">{{ network }}</span>
+                    <span v-if="!props.onlyIcons" class="capitalize">{{ network }}</span>
                 </NuxtLink>
             </li>
         </ul>

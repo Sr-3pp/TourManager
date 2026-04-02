@@ -3,65 +3,21 @@ import { setResponseHeaders, sendStream, createError } from 'h3';
 import { Readable } from 'node:stream';
 
 import {
-  S3Client,
   ListObjectsV2Command,
   GetObjectCommand,
   DeleteObjectCommand,
   DeleteObjectsCommand,
   PutObjectCommand,
 } from '@aws-sdk/client-s3';
-import type { S3ClientConfig, PutObjectCommandInput } from '@aws-sdk/client-s3';
-import type { FileEntry, PutBody, R2Config, RuntimeR2Config } from '~~/types/server';
-
-const runtime = useRuntimeConfig() as RuntimeR2Config;
-const nested = runtime.r2;
-const accountId = String(runtime.r2AccountId || '').trim();
-
-// Support both config styles:
-// 1) runtimeConfig.r2.{endpoint,accessKey,secretKey,bucket}
-// 2) flat runtimeConfig.{r2AccountId,r2AccessKeyId,r2SecretAccessKey,r2BucketName}
-const r2: R2Config = {
-  endpoint:
-    nested?.endpoint ||
-    (accountId ? `https://${accountId}.r2.cloudflarestorage.com` : undefined),
-  accessKey: nested?.accessKey || runtime.r2AccessKeyId,
-  secretKey: nested?.secretKey || runtime.r2SecretAccessKey,
-  bucket: nested?.bucket || runtime.r2BucketName,
-};
-
-const isPrerender = process.env.NITRO_PRE_RENDER === '1' || process.env.NUXT_IS_PRERENDER === '1';
-const hasR2 = Boolean(r2 && r2.endpoint && r2.accessKey && r2.secretKey && r2.bucket);
-
-// If runtime config is missing or we're prerendering, avoid constructing
-// a live S3 client which would error on empty bucket/credentials. We'll
-// create a small wrapper that throws controlled errors or returns safe
-// fallbacks for list/serve operations during prerender.
-let s3: S3Client | null = null;
-try {
-  // Initialize S3 client only when R2 is fully configured. If we're
-  // prerendering but R2 is configured (CI case), allow initialization so
-  // real handlers can run; otherwise leave s3 null so we can short-circuit.
-  if (hasR2) {
-    // r2 is asserted present by hasR2
-    const cfg: S3ClientConfig = {
-      region: 'auto',
-      endpoint: r2!.endpoint,
-      credentials: {
-        accessKeyId: r2!.accessKey as string,
-        secretAccessKey: r2!.secretKey as string,
-      },
-    } as S3ClientConfig;
-
-    s3 = new S3Client(cfg);
-  }
-} catch (e) {
-  // Leave s3 as null; individual methods will handle null and either
-  // return graceful fallbacks or throw createError when invoked at runtime.
-
-  console.warn('R2 client not initialized:', (e as Error).message);
-}
+import type { PutObjectCommandInput } from '@aws-sdk/client-s3';
+import { getR2Client } from '~~/server/utils/r2-client'
+import { getR2Config } from '~~/server/utils/r2-config'
+import type { FileEntry, PutBody } from '~~/types/server';
 
 export function useHubBlob() {
+  const { isPrerender, r2 } = getR2Config()
+  const s3 = getR2Client()
+
   const getContentType = (body: PutBody): string | undefined => {
     if (body && typeof body === 'object') {
       // Blob-like
@@ -76,8 +32,6 @@ export function useHubBlob() {
     limit?: number;
   }): Promise<FileEntry[] | { error: string }> => {
     const { prefix, limit } = params;
-    // If prerendering or s3 is not available, return an empty list to
-    // avoid build failure.
     if (isPrerender || !s3 || !r2?.bucket) {
       return [];
     }

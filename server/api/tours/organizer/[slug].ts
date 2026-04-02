@@ -3,7 +3,7 @@ import { Tour } from '~~/server/models/Tour'
 import mongoose from 'mongoose'
 import { User } from '~~/server/models/User'
 import { dbConnect } from '~~/server/utils/db'
-import { ensureUserSlug } from '~~/server/utils/slug'
+import { ensureUsername } from '~~/server/utils/username'
 
 function isObjectIdLike(value: string) {
     return /^[a-f0-9]{24}$/i.test(value)
@@ -13,7 +13,7 @@ function escapeRegex(value: string) {
     return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
-function getSlugFromRequest(event: H3Event) {
+function getUsernameFromRequest(event: H3Event) {
     const routeSlug = getRouterParam(event, 'slug')
 
     if (routeSlug) {
@@ -27,32 +27,32 @@ function getSlugFromRequest(event: H3Event) {
     return String(lastSegment || '').trim().toLowerCase()
 }
 
-async function findOrganizerBySlugOrName(slug: string) {
-    const bySlug = await User.findOne({ slug }).select('_id slug name')
+async function findOrganizerByUsernameOrName(username: string) {
+    const byUsername = await User.findOne({ username }).select('_id username name')
 
-    if (bySlug) {
-        return bySlug
+    if (byUsername) {
+        return byUsername
     }
 
-    const normalizedPattern = escapeRegex(slug).replace(/-/g, '[\\s-]+')
+    const normalizedPattern = escapeRegex(username).replace(/-/g, '[\\s-]+')
     return User.findOne({
         name: {
             $regex: new RegExp(`^${normalizedPattern}$`, 'i'),
         },
-    }).select('_id slug name')
+    }).select('_id username name')
 }
 
-async function findOrganizerBySlugOrNameRaw(slug: string) {
+async function findOrganizerByUsernameOrNameRaw(username: string) {
     const db = mongoose.connection.db
 
     if (!db) {
         return null
     }
 
-    const normalizedPattern = escapeRegex(slug).replace(/-/g, '[\\s-]+')
+    const normalizedPattern = escapeRegex(username).replace(/-/g, '[\\s-]+')
     const doc = await db.collection('users').findOne({
         $or: [
-            { slug },
+            { username },
             {
                 name: {
                     $regex: new RegExp(`^${normalizedPattern}$`, 'i'),
@@ -65,24 +65,24 @@ async function findOrganizerBySlugOrNameRaw(slug: string) {
         return null
     }
 
-    return User.findById(doc._id).select('_id slug name')
+    return User.findById(doc._id).select('_id username name')
 }
 
 export default defineEventHandler(async (event) => {
     await dbConnect()
 
-    const slug = getSlugFromRequest(event)
+    const username = getUsernameFromRequest(event)
 
-    if (!slug) {
+    if (!username) {
         throw createError({
             statusCode: 400,
-            statusMessage: 'Organizer slug is required',
+            statusMessage: 'Organizer username is required',
         })
     }
 
-    const organizer = isObjectIdLike(slug)
-        ? await User.findById(slug).select('_id slug name')
-        : (await findOrganizerBySlugOrName(slug)) || (await findOrganizerBySlugOrNameRaw(slug))
+    const organizer = isObjectIdLike(username)
+        ? await User.findById(username).select('_id username name')
+        : (await findOrganizerByUsernameOrName(username)) || (await findOrganizerByUsernameOrNameRaw(username))
 
     if (!organizer) {
         throw createError({
@@ -91,16 +91,16 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    if (!organizer.slug?.trim()) {
-        const ensuredSlug = await ensureUserSlug(String(organizer._id), organizer.name)
-        if (ensuredSlug) {
-            organizer.slug = ensuredSlug
+    if (!organizer.username?.trim()) {
+        const ensuredUsername = await ensureUsername(String(organizer._id), organizer.name)
+        if (ensuredUsername) {
+            organizer.username = ensuredUsername
         }
     }
 
     const tours = await Tour.find({ creator: organizer._id })
         .sort({ date: -1 })
-        .populate('creator', 'name slug')
+        .populate('creator', 'name username')
         .lean()
 
     return {

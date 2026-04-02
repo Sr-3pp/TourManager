@@ -6,13 +6,13 @@ export type ProfileSocial = {
 
 export type OrganizerUser = {
 	name?: string
-	slug?: string
+	username?: string
 	profile?: Profile
 }
 
 export type ProfileUser = {
 	name?: string
-	slug?: string
+	username?: string
 } | null
 
 export type Profile = {
@@ -30,7 +30,7 @@ export type FeaturedOrganizer = {
 	user: {
 		id?: string
 		name?: string
-		slug?: string
+		username?: string
 	}
 }
 

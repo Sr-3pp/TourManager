@@ -3,9 +3,10 @@ import { formatTourDate, formatTourPrice, getTourOrganizerName } from '~~/app/ut
 
 const { featuredTours, featuredTour, loadFeaturedTours } = useTour()
 const { featuredOrganizers, loadFeaturedOrganizers } = useUser()
+const seo = useSeo()
 
 const featuredDate = computed(() => {
-  return formatTourDate(featuredTour.value?.date, 'Schedule coming soon', {
+  return formatTourDate(featuredTour.value?.date, 'Horario próximamente', {
     weekday: 'long',
     month: 'long',
     day: 'numeric',
@@ -14,6 +15,14 @@ const featuredDate = computed(() => {
 
 const featuredPrice = computed(() => formatTourPrice(featuredTour.value?.price))
 const featuredOrganizer = computed(() => getTourOrganizerName(featuredTour.value))
+const pageTitle = computed(() => `Tours destacados y organizadores | ${seo.siteName.value}`)
+const pageDescription = computed(() =>
+  seo.description(
+    'Descubre tours destacados, organizadores y próximas experiencias de viaje en Tour Manager.',
+    featuredTour.value?.name ? `Tour en portada: ${featuredTour.value.name}.` : '',
+    featuredTour.value?.location ? `Ubicación: ${featuredTour.value.location}.` : '',
+  ),
+)
 
 const { error } = await useAsyncData(
   'homepage-featured-content',
@@ -28,10 +37,42 @@ const { error } = await useAsyncData(
 if (error.value) {
   throw createError({
     statusCode: error.value.statusCode || 500,
-    statusMessage: error.value.statusMessage || 'Failed to load tours',
+    statusMessage: error.value.statusMessage || 'No se pudieron cargar los tours',
     fatal: true,
   })
 }
+
+seo.setCanonical('/')
+
+useSeoMeta({
+  title: pageTitle,
+  description: pageDescription,
+  ogTitle: pageTitle,
+  ogDescription: pageDescription,
+  ogType: 'website',
+  ogUrl: seo.canonical('/'),
+  ogImage: seo.imageUrl(),
+  twitterCard: 'summary_large_image',
+  twitterTitle: pageTitle,
+  twitterDescription: pageDescription,
+  twitterImage: seo.imageUrl(),
+})
+
+seo.setJsonLd('home-structured-data', [
+  {
+    '@type': 'WebSite',
+    name: seo.siteName.value,
+    url: seo.canonical('/'),
+    description: pageDescription.value,
+    inLanguage: 'es-MX',
+  },
+  {
+    '@type': 'Organization',
+    name: seo.siteName.value,
+    url: seo.canonical('/'),
+    logo: seo.imageUrl('/favicon.ico'),
+  },
+])
 </script>
 
 <template>
@@ -45,24 +86,24 @@ if (error.value) {
       <div class="grid gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,440px)] lg:items-center">
         <div class="space-y-6">
           <div class="inline-flex rounded-full border border-secondary/20 bg-secondary/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-secondary">
-            Featured tours
+            Tours destacados
           </div>
 
           <div class="space-y-4">
             <h1 class="max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-              Give paid placements the homepage visibility they were meant to get.
+              Descubre tours destacados, organizadores y nuevas experiencias de viaje.
             </h1>
             <p class="max-w-2xl text-base leading-7 text-muted sm:text-lg">
-              This section is reserved for tours marked as featured, so promoted trips get priority placement across the landing page.
+              Tour Manager reúne tours promocionados y perfiles de organizadores para que la portada muestre las salidas con mayor visibilidad y contexto para nuevos viajeros.
             </p>
           </div>
 
           <div class="flex flex-wrap gap-3">
             <UButton v-if="featuredTour?._id" :to="`/tour/${featuredTour._id}`" color="primary" size="xl">
-              Explore featured tour
+              Ver tour destacado
             </UButton>
             <UButton to="/#tour-showcase" color="secondary" variant="soft" size="xl">
-              Browse showcase
+              Ver destacados
             </UButton>
           </div>
         </div>
@@ -81,7 +122,7 @@ if (error.value) {
                 class="flex h-64 items-end bg-gradient-to-br from-primary via-secondary to-primary p-6 text-inverted"
               >
                 <div>
-                  <p class="text-xs uppercase tracking-[0.3em] text-inverted/70">Featured route</p>
+                  <p class="text-xs uppercase tracking-[0.3em] text-inverted/70">Ruta destacada</p>
                   <h2 class="mt-3 text-3xl font-bold">{{ featuredTour.name }}</h2>
                 </div>
               </div>
@@ -90,59 +131,49 @@ if (error.value) {
             <div class="flex flex-wrap gap-2">
               <UBadge color="secondary" variant="soft">{{ featuredDate }}</UBadge>
               <UBadge color="primary" variant="soft">{{ featuredPrice }}</UBadge>
-              <UBadge color="neutral" variant="soft">{{ featuredTour.location || 'Location pending' }}</UBadge>
+              <UBadge color="neutral" variant="soft">{{ featuredTour.location || 'Ubicación pendiente' }}</UBadge>
             </div>
 
             <div>
-              <p class="text-sm font-medium uppercase tracking-[0.18em] text-primary">Now spotlighting</p>
+              <p class="text-sm font-medium uppercase tracking-[0.18em] text-primary">En portada ahora</p>
               <h2 class="mt-2 text-3xl font-semibold tracking-tight">{{ featuredTour.name }}</h2>
               <p class="mt-3 text-sm leading-6 text-muted">
-                {{ featuredTour.description || 'This featured tour currently has paid visibility on the homepage while route details and attendee information continue to update.' }}
+                {{ featuredTour.description || 'Este tour destacado tiene visibilidad pagada en la portada mientras se siguen actualizando los detalles de la ruta y la información de asistentes.' }}
               </p>
             </div>
 
             <div class="grid gap-3 sm:grid-cols-3">
-              <div class="rounded-2xl bg-muted/40 p-4">
-                <p class="text-xs uppercase tracking-[0.18em] text-muted">Organizer</p>
+              <div class="rounded-2xl bg-muted/40 p-4 col-span-3">
+                  <p class="text-xs uppercase tracking-[0.18em] text-muted">Organizador</p>
                 <p class="mt-2 font-semibold">{{ featuredOrganizer }}</p>
               </div>
               <div class="rounded-2xl bg-muted/40 p-4">
-                <p class="text-xs uppercase tracking-[0.18em] text-muted">Attendees</p>
+                  <p class="text-xs uppercase tracking-[0.18em] text-muted">Asistentes</p>
                 <p class="mt-2 font-semibold">{{ featuredTour.attendees?.length ?? 0 }}</p>
               </div>
               <div class="rounded-2xl bg-muted/40 p-4">
-                <p class="text-xs uppercase tracking-[0.18em] text-muted">Sponsors</p>
+                  <p class="text-xs uppercase tracking-[0.18em] text-muted">Patrocinadores</p>
                 <p class="mt-2 font-semibold">{{ featuredTour.sponsors?.length ?? 0 }}</p>
               </div>
             </div>
           </div>
 
           <div v-else class="rounded-[1.5rem] border border-dashed border-default p-8 text-center">
-            <p class="text-sm font-medium uppercase tracking-[0.18em] text-primary">No featured tours yet</p>
-            <h2 class="mt-3 text-2xl font-semibold">The homepage is waiting for its first paid placement.</h2>
+            <p class="text-sm font-medium uppercase tracking-[0.18em] text-primary">Aún no hay tours destacados</p>
+            <h2 class="mt-3 text-2xl font-semibold">La portada está esperando su primera promoción pagada.</h2>
             <p class="mt-3 text-sm leading-6 text-muted">
-              Once a tour is marked as featured, it will appear here automatically.
+              Cuando un tour sea marcado como destacado, aparecerá aquí automáticamente.
             </p>
           </div>
         </UCard>
       </div>
 
       <div id="tour-showcase" class="mt-12 space-y-6 scroll-mt-28 sm:mt-16">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p class="text-sm font-medium uppercase tracking-[0.18em] text-primary">
-              Paid homepage placements
-            </p>
-            <h2 class="mt-2 text-3xl font-semibold tracking-tight">Featured organizers and tours</h2>
-          </div>
-          <p class="max-w-2xl text-sm leading-6 text-muted">
-            Organizers and tours share the same row here, each inside its own carousel-driven panel.
-          </p>
-        </div>
+        <h2 class="mt-2 text-3xl font-semibold tracking-tight">Organizadores y tours destacados</h2>
 
         <div class="grid gap-6 lg:grid-cols-3 lg:items-start">
-          <HomeFeaturedOrganizersPanel :organizers="featuredOrganizers" />
-          <HomeFeaturedToursPanel :tours="featuredTours" />
+          <OrganizerFeaturedCarousel :organizers="featuredOrganizers" />
+          <TourFeaturedCarousel :tours="featuredTours" />
         </div>
       </div>
     </UContainer>

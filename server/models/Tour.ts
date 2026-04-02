@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
+import type { TourDocument } from '~~/types/models'
 
-const TourSchema = new mongoose.Schema(
+const TourSchema = new mongoose.Schema<TourDocument>(
   {
     name: {
         type: String,
@@ -170,4 +171,4 @@ const TourSchema = new mongoose.Schema(
 )
 
 export const Tour =
-  (mongoose.models.Tour as mongoose.Model<any>) || mongoose.model('Tour', TourSchema)
+  (mongoose.models.Tour as mongoose.Model<TourDocument>) || mongoose.model<TourDocument>('Tour', TourSchema)

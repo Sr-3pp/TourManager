@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
+import type { ProfileDocument } from '~~/types/models'
 
-const ProfileSchema = new mongoose.Schema(
+const ProfileSchema = new mongoose.Schema<ProfileDocument>(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
@@ -56,4 +57,4 @@ const ProfileSchema = new mongoose.Schema(
 )
 
 export const Profile =
-    (mongoose.models.Profile as mongoose.Model<any>) || mongoose.model('Profile', ProfileSchema)
+    (mongoose.models.Profile as mongoose.Model<ProfileDocument>) || mongoose.model<ProfileDocument>('Profile', ProfileSchema)

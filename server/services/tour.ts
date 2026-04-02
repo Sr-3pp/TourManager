@@ -4,109 +4,23 @@ import {
   MAX_PROFILE_UPLOAD_SOURCE_BYTES,
 } from '~~/server/utils/image'
 import { useHubBlob } from '~~/server/utils/r2'
+import {
+  normalizeBoolean,
+  normalizeDate,
+  normalizeNullableString,
+  normalizeNumber,
+  normalizeString,
+  parseMultipartJson,
+} from '~~/server/utils/validation'
 import type {
   NestedFieldOptions,
-  NormalizeStringOptions,
   TourAttendee,
   TourCreateBody,
   TourDeparturePoint,
   TourPackage,
-  TourSponsor,
   TourSocial,
+  TourSponsor,
 } from '~~/types/tour'
-
-export function normalizeString(value: unknown, field: string, options?: NormalizeStringOptions) {
-  const required = options?.required ?? false
-
-  if (value === undefined || value === null) {
-    if (required) {
-      throw createError({
-        statusCode: 400,
-        statusMessage: `${field} is required`,
-      })
-    }
-
-    return ''
-  }
-
-  if (typeof value !== 'string') {
-    throw createError({
-      statusCode: 400,
-      statusMessage: `${field} must be a string`,
-    })
-  }
-
-  const normalized = value.trim()
-
-  if (required && !normalized) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: `${field} is required`,
-    })
-  }
-
-  return normalized
-}
-
-export function normalizeNullableString(value: unknown, field: string) {
-  if (value === null) {
-    return null
-  }
-
-  return normalizeString(value, field)
-}
-
-export function normalizeBoolean(value: unknown, field: string) {
-  if (typeof value === 'boolean') {
-    return value
-  }
-
-  if (typeof value === 'string') {
-    const normalized = value.trim().toLowerCase()
-
-    if (normalized === 'true') {
-      return true
-    }
-
-    if (normalized === 'false') {
-      return false
-    }
-  }
-
-  throw createError({
-    statusCode: 400,
-    statusMessage: `${field} must be a boolean`,
-  })
-}
-
-export function normalizeDate(value: unknown, field: string) {
-  const dateString = normalizeString(value, field, { required: true })
-  const parsed = new Date(dateString)
-
-  if (Number.isNaN(parsed.getTime())) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: `${field} must be a valid date`,
-    })
-  }
-
-  return parsed
-}
-
-export function parseMultipartJson(value: string | undefined, field: string) {
-  if (value === undefined || value === '') {
-    return undefined
-  }
-
-  try {
-    return JSON.parse(value)
-  } catch {
-    throw createError({
-      statusCode: 400,
-      statusMessage: `${field} must be valid JSON`,
-    })
-  }
-}
 
 export function normalizeSocial(value: unknown, field: string): TourSocial {
   if (value === undefined || value === null) {
@@ -318,15 +232,16 @@ export async function parseTourBody(event: H3Event, sessionUserId: string) {
     const formData = (await readMultipartFormData(event)) ?? []
 
     const field = (name: string) =>
-      formData.find((part) => part.name === name && !part.filename)?.data.toString('utf8')
+      formData.find(part => part.name === name && !part.filename)?.data.toString('utf8')
 
-    const imageFile = formData.find((part) => part.name === 'imageFile' && part.filename)
+    const imageFile = formData.find(part => part.name === 'imageFile' && part.filename)
 
     body = {
       name: field('name'),
       description: field('description'),
       location: field('location'),
       date: field('date'),
+      price: field('price'),
       featured: field('featured') === undefined ? undefined : field('featured') === 'true',
       attendees: parseMultipartJson(field('attendees'), 'attendees'),
       sponsors: parseMultipartJson(field('sponsors'), 'sponsors'),
@@ -369,4 +284,80 @@ export async function parseTourBody(event: H3Event, sessionUserId: string) {
     body,
     imagePath,
   }
+}
+
+export function buildTourCreateInput(body: TourCreateBody, parsedImagePath?: string | null) {
+  let imagePath = parsedImagePath
+
+  const name = normalizeString(body.name, 'name', { required: true })
+  const description = normalizeString(body.description, 'description')
+  const location = normalizeString(body.location, 'location')
+  const date = normalizeDate(body.date, 'date')
+  const price = normalizeNumber(body.price, 'price', { required: true, min: 0 })
+  const featured = body.featured === undefined ? false : normalizeBoolean(body.featured, 'featured')
+  const attendees = normalizeAttendees(body.attendees)
+  const sponsors = normalizeSponsors(body.sponsors)
+  const packages = normalizePackages(body.packages)
+  const departurePoints = normalizeDeparturePoints(body.departure_points)
+
+  if ('image' in body && body.image !== undefined) {
+    imagePath = normalizeNullableString(body.image, 'image')
+  }
+
+  return {
+    name,
+    description,
+    location,
+    date,
+    price,
+    featured,
+    image: imagePath ?? null,
+    attendees,
+    sponsors,
+    packages,
+    departure_points: departurePoints,
+  }
+}
+
+export function buildTourUpdateInput(body: TourCreateBody, imagePath?: string | null) {
+  const scalarFieldNormalizers = {
+    name: (value: unknown) => normalizeString(value, 'name', { required: true }),
+    description: (value: unknown) => normalizeString(value, 'description'),
+    location: (value: unknown) => normalizeString(value, 'location'),
+    date: (value: unknown) => normalizeDate(value, 'date'),
+    price: (value: unknown) => normalizeNumber(value, 'price', { required: true, min: 0 }),
+    featured: (value: unknown) => normalizeBoolean(value, 'featured'),
+    image: (value: unknown) => normalizeNullableString(value, 'image'),
+  } satisfies Record<string, (value: unknown) => unknown>
+
+  const collectionFieldNormalizers = {
+    attendees: (value: unknown) => normalizeAttendees(value, { requiredFields: true }),
+    sponsors: (value: unknown) => normalizeSponsors(value, { requiredFields: true }),
+    packages: (value: unknown) => normalizePackages(value, { requiredFields: true }),
+    departure_points: (value: unknown) => normalizeDeparturePoints(value, { requiredFields: true }),
+  } satisfies Record<string, (value: unknown) => unknown>
+
+  const update: Record<string, unknown> = {}
+
+  for (const [field, normalize] of Object.entries(scalarFieldNormalizers)) {
+    const value = body[field as keyof typeof body]
+
+    if (value !== undefined) {
+      update[field] = normalize(value)
+    }
+  }
+
+  for (const [field, normalize] of Object.entries(collectionFieldNormalizers)) {
+    const value = body[field as keyof typeof body]
+
+    if (value !== undefined) {
+      update[field] = normalize(value)
+    }
+  }
+
+  if (imagePath !== undefined) {
+    update.image = imagePath
+  }
+
+  return update
 }

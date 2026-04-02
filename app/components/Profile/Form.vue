@@ -6,7 +6,7 @@ import type { OrganizerProfileFormState, Profile } from '~~/types/profile'
 const MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024
 
 const organizerProfileSchema = z.object({
-    bio: z.string().max(500, 'Bio is too long').optional().default(''),
+    bio: z.string().max(500, 'La biografía es demasiado larga').optional().default(''),
     instagram: z.string().max(100).optional().default(''),
     tiktok: z.string().max(100).optional().default(''),
     x: z.string().max(100).optional().default(''),
@@ -32,9 +32,6 @@ const draft = reactive<OrganizerProfileFormState>({
 const pictureFile = ref<File | null>(null)
 const bannerFile = ref<File | null>(null)
 
-const picturePreviewUrl = ref<string | null>(null)
-const bannerPreviewUrl = ref<string | null>(null)
-
 function mapProfileToDraft(profileData: Profile | undefined) {
     draft.bio = profileData?.bio ?? ''
     draft.instagram = profileData?.social?.instagram ?? ''
@@ -43,74 +40,12 @@ function mapProfileToDraft(profileData: Profile | undefined) {
 }
 
 watch(pictureFile, (file, previousFile) => {
-    if (picturePreviewUrl.value && previousFile) {
-        URL.revokeObjectURL(picturePreviewUrl.value)
-        picturePreviewUrl.value = null
-    }
-
-    if (file) {
-        picturePreviewUrl.value = URL.createObjectURL(file)
-    }
-})
-
-watch(bannerFile, (file, previousFile) => {
-    if (bannerPreviewUrl.value && previousFile) {
-        URL.revokeObjectURL(bannerPreviewUrl.value)
-        bannerPreviewUrl.value = null
-    }
-
-    if (file) {
-        bannerPreviewUrl.value = URL.createObjectURL(file)
-    }
-})
-
-onBeforeUnmount(() => {
-    if (picturePreviewUrl.value) {
-        URL.revokeObjectURL(picturePreviewUrl.value)
-    }
-
-    if (bannerPreviewUrl.value) {
-        URL.revokeObjectURL(bannerPreviewUrl.value)
-    }
-})
-
-function onPictureChange(event: Event) {
-    const target = event.target as HTMLInputElement
-    const file = target.files?.[0] ?? null
-
-    if (!file) {
+    if (file && file.size > MAX_UPLOAD_SIZE_BYTES) {
+        errorMessage.value = 'La foto de perfil debe pesar menos de 10 MB (se comprimirá automáticamente).'
         pictureFile.value = null
         return
     }
-
-    if (file.size > MAX_UPLOAD_SIZE_BYTES) {
-        errorMessage.value = 'Profile picture must be less than 10MB (it will be compressed automatically).'
-        pictureFile.value = null
-        target.value = ''
-        return
-    }
-
-    pictureFile.value = file
-}
-
-function onBannerChange(event: Event) {
-    const target = event.target as HTMLInputElement
-    const file = target.files?.[0] ?? null
-
-    if (!file) {
-        bannerFile.value = null
-        return
-    }
-
-    if (file.size > MAX_UPLOAD_SIZE_BYTES) {
-        errorMessage.value = 'Banner image must be less than 10MB (it will be compressed automatically).'
-        bannerFile.value = null
-        target.value = ''
-        return
-    }
-
-    bannerFile.value = file
-}
+})
 
 async function onSubmit(event: FormSubmitEvent<OrganizerProfileFormState>) {
     const ok = await saveProfile(event.data, {
@@ -136,11 +71,6 @@ onMounted(() => syncDraft())
 
 <template>
     <div class="max-w-2xl space-y-4">
-        <div class="space-y-1">
-            <h2 class="text-xl font-semibold">Organizer Profile</h2>
-            <p class="text-sm text-gray-600">Update your public organizer profile details.</p>
-        </div>
-
         <UAlert
             v-if="errorMessage"
             color="error"
@@ -161,63 +91,100 @@ onMounted(() => syncDraft())
             class="space-y-4"
             @submit="onSubmit"
         >
-            <UFormField name="bio" label="Bio">
-                <UTextarea v-model="draft.bio" :rows="4" placeholder="Tell people about your work..." />
-            </UFormField>
+            <UCard>
+                <div class="space-y-5">
+                    <FormSectionHeader
+                        title="Identidad visual"
+                        description="Actualiza el banner y la foto que representan tu perfil público."
+                        badge="Media"
+                        badge-color="secondary"
+                    />
 
-            <UFormField name="picture" label="Profile Picture (max 10MB)">
-                <UInput type="file" accept="image/*" @change="onPictureChange" />
-                <div class="mt-2">
-                    <img
-                        v-if="picturePreviewUrl"
-                        :src="picturePreviewUrl"
-                        alt="New profile picture preview"
-                        class="h-24 w-24 rounded-full border object-cover"
-                    >
-                    <img
-                        v-else-if="profile?.picture"
-                        :src="`/blob/${profile.picture}`"
-                        alt="Current profile picture"
-                        class="h-24 w-24 rounded-full border object-cover"
-                    >
+                    <div class="flex flex-col gap-6">
+                        <UFormField name="banner" label="Banner (máx. 10 MB)" class="relative">
+                                <UFileUpload
+                                    v-model="bannerFile"
+                                    class="w-full relative z-10 h-full"
+                                    accept="image/*"
+                                    :preview="false"
+                                    label="Selecciona un banner"
+                                    description="PNG, JPG o WEBP de hasta 10 MB"
+                                    :ui="{ base: 'bg-gradient-to-t from-[var(--ui-bg-muted)] to-transparent' }"
+                                />
+                                <NuxtImg
+                                    v-if="profile?.banner"
+                                    :src="`/blob/${profile.banner}`"
+                                    alt="Banner actual"
+                                    class="absolute inset-0 h-full w-full object-cover rounded-lg"
+                                />
+                        </UFormField>
+
+                        <div class="flex gap-4 items-center">
+                            <NuxtImg
+                                v-if="profile?.picture"
+                                :src="`/blob/${profile.picture}`"
+                                alt="Foto de perfil actual"
+                                class="h-28 w-28 rounded-full object-cover flex-shrink-0"
+                            />
+                            <UFormField name="picture" label="Foto de perfil (máx. 10 MB)" class="w-full">
+                                    <UFileUpload
+                                        v-model="pictureFile"
+                                        class="w-full"
+                                        accept="image/*"
+                                        :preview="false"
+                                        label="Selecciona una foto"
+                                        description="PNG, JPG o WEBP de hasta 10 MB"
+                                        :ui="{ base: 'bg-gradient-to-t from-[var(--ui-bg-muted)] to-transparent' }"
+                                    />
+    
+                                </UFormField>
+                        </div>
+
+                    </div>
                 </div>
-            </UFormField>
+            </UCard>
 
-            <UFormField name="banner" label="Banner (max 10MB)">
-                <UInput type="file" accept="image/*" @change="onBannerChange" />
-                <div class="mt-2">
-                    <img
-                        v-if="bannerPreviewUrl"
-                        :src="bannerPreviewUrl"
-                        alt="New banner preview"
-                        class="h-24 w-full rounded-md border object-cover"
-                    >
-                    <img
-                        v-else-if="profile?.banner"
-                        :src="`/blob/${profile.banner}`"
-                        alt="Current banner"
-                        class="h-24 w-full rounded-md border object-cover"
-                    >
+            <UCard>
+                <div class="space-y-5">
+                    <FormSectionHeader
+                        title="Perfil público"
+                        description="Define tu presentación y los enlaces sociales que verán los viajeros."
+                        badge="Perfil"
+                        badge-color="primary"
+                    />
+
+                    <UFormField name="bio" label="Biografía">
+                        <UTextarea class="w-full" v-model="draft.bio" :rows="5" placeholder="Cuéntale a la gente sobre tu trabajo..." />
+                    </UFormField>
+
+                    <USeparator />
+
+                    <div class="space-y-3">
+                        <FormSectionHeader
+                            title="Redes sociales"
+                            description="Comparte tus canales principales para que te encuentren con facilidad."
+                            badge="3 campos"
+                        />
+
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <UFormField name="instagram" label="Instagram">
+                                <UInput v-model="draft.instagram" placeholder="@tuusuario" class="w-full" />
+                            </UFormField>
+
+                            <UFormField name="x" label="X">
+                                <UInput v-model="draft.x" placeholder="@tuusuario" class="w-full" />
+                            </UFormField>
+
+                            <UFormField name="tiktok" label="TikTok" class="sm:col-span-2">
+                                <UInput v-model="draft.tiktok" placeholder="@tuusuario" class="w-full" />
+                            </UFormField>
+                        </div>
+                    </div>
                 </div>
-            </UFormField>
+            </UCard>
 
-            <UFormField name="instagram" label="Instagram">
-                <UInput v-model="draft.instagram" placeholder="@yourhandle" />
-            </UFormField>
-
-            <UFormField name="x" label="X">
-                <UInput v-model="draft.x" placeholder="@yourhandle" />
-            </UFormField>
-
-            <UFormField name="tiktok" label="TikTok">
-                <UInput v-model="draft.tiktok" placeholder="@yourhandle" />
-            </UFormField>
-
-            <div class="flex gap-3">
-                <UButton type="submit" :loading="isSaving" :disabled="isLoading">Save Profile</UButton>
-                <UButton type="button" color="neutral" variant="soft" :disabled="isSaving" @click="() => syncDraft()">
-                    Reload
-                </UButton>
+            <div class="flex gap-3 justify-end">
+                <UButton type="submit" :loading="isSaving" :disabled="isLoading">Guardar perfil</UButton>
             </div>
         </UForm>
     </div>

@@ -17,7 +17,7 @@ export type Tour = {
 export type TourCreatorSummary = {
   _id?: string
   name?: string
-  slug?: string
+  username?: string
 }
 
 export type TourSocial = {
@@ -60,6 +60,9 @@ export type TourFormState = {
   description: string
   location: string
   date: string
+  price: number
+  attendees: TourAttendee[]
+  sponsors: TourSponsor[]
   packages: TourPackage[]
   departure_points: Array<Omit<TourDeparturePoint, 'dateTime'> & { dateTime: string }>
 }
@@ -86,6 +89,7 @@ export type TourCreateBody = {
   description?: string
   date?: string
   location?: string
+  price?: unknown
   image?: string | null
   featured?: boolean
   attendees?: unknown

@@ -9,7 +9,7 @@ const user = computed(() => session.value?.user || null)
 const navItems = computed(() => {
   const items = [
     {
-      label: 'Discover',
+      label: 'Explorar',
       to: '/',
       icon: 'i-lucide-compass',
       visible: true,
@@ -22,7 +22,7 @@ const navItems = computed(() => {
 const userMenuItems = computed(() => {
   const accountItems = [
     {
-      label: 'Profile',
+      label: 'Perfil',
       icon: 'i-lucide-user-round',
       to: '/profile',
     },
@@ -40,7 +40,7 @@ const userMenuItems = computed(() => {
     accountItems,
     [
       {
-        label: 'Logout',
+        label: 'Cerrar sesión',
         icon: 'i-lucide-log-out',
         onSelect: async () => {
           await logoutUser()
@@ -72,7 +72,7 @@ function isActive(path: string) {
 
             <div class="min-w-0">
               <p class="truncate text-base font-semibold tracking-tight">Tour Manager</p>
-              <p class="truncate text-xs uppercase tracking-[0.24em] text-muted">Plan. Publish. Host.</p>
+              <p class="truncate text-xs uppercase tracking-[0.24em] text-muted">Planea. Publica. Organiza.</p>
             </div>
           </NuxtLink>
         </div>
@@ -115,8 +115,8 @@ function isActive(path: string) {
             </template>
 
             <template v-else>
-              <UButton to="/auth/login" color="primary">Login</UButton>
-              <UButton to="/auth/register" color="secondary" variant="soft">Register</UButton>
+              <UButton to="/auth/login" color="primary">Iniciar sesión</UButton>
+              <UButton to="/auth/register" color="secondary" variant="soft">Registrarse</UButton>
             </template>
           </div>
         </div>

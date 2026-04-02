@@ -5,10 +5,18 @@ import { mongodbAdapter } from 'better-auth/adapters/mongodb'
 import mongoose from 'mongoose'
 import { Profile } from '~~/server/models/Profile'
 import { User } from '~~/server/models/User'
-import { ensureUserSlug } from '~~/server/utils/slug'
+import type { ServerAuthSession } from '~~/types/auth'
+import { ensureUsername } from '~~/server/utils/username'
 import { dbConnect } from './db'
 
 let authInstance: ReturnType<typeof betterAuth> | null = null
+
+function parseList(value: string | undefined) {
+  return (value ?? '')
+    .split(',')
+    .map(item => item.trim())
+    .filter(Boolean)
+}
 
 export async function ensureProfileForUser(userId: string) {
   await dbConnect()
@@ -34,6 +42,10 @@ export async function getAuth() {
     return authInstance
   }
 
+  const runtimeConfig = useRuntimeConfig()
+  const allowedHosts = parseList(runtimeConfig.betterAuthAllowedHosts)
+  const trustedOrigins = parseList(runtimeConfig.betterAuthTrustedOrigins)
+
   // Ensure mongoose connection exists
   await dbConnect()
 
@@ -43,6 +55,14 @@ export async function getAuth() {
   }
 
   const authOptions: BetterAuthOptions = {
+    baseURL: allowedHosts.length > 0
+      ? {
+          allowedHosts,
+          fallback: runtimeConfig.betterAuthUrl || undefined,
+        }
+      : runtimeConfig.betterAuthUrl || undefined,
+    trustedOrigins,
+    secret: runtimeConfig.betterAuthSecret,
     database: mongodbAdapter(db, {
       client: mongoose.connection.getClient(),
       usePlural: true,
@@ -50,6 +70,15 @@ export async function getAuth() {
 
     user: {
       additionalFields: {
+        username: {
+          type: 'string',
+          required: false,
+        },
+        lastname: {
+          type: 'string',
+          required: false,
+          defaultValue: '',
+        },
         level: {
           type: 'number',
           required: false,
@@ -63,7 +92,7 @@ export async function getAuth() {
       user: {
         create: {
           after: async (user) => {
-            await ensureUserSlug(user.id, user.name)
+            await ensureUsername(user.id, user.name)
             await ensureProfileForUser(user.id)
           },
         },
@@ -86,7 +115,7 @@ export async function getAuth() {
   return authInstance
 }
 
-export async function getSessionWithProfile(event: H3Event) {
+export async function getSessionWithProfile(event: H3Event): Promise<ServerAuthSession | null> {
   const auth = await getAuth()
   const headers = new Headers(
     Object.entries(getHeaders(event)).flatMap(([key, value]) =>
@@ -102,14 +131,21 @@ export async function getSessionWithProfile(event: H3Event) {
     return null
   }
 
-  await ensureUserSlug(session.user.id, session.user.name)
+  await ensureUsername(session.user.id, session.user.name)
   await ensureProfileForUser(session.user.id)
 
   const user = await User.findById(session.user.id).populate('profile')
+  const sessionUserRecord = session.user as Record<string, unknown>
+  const resolvedUser = user
+    ? { ...session.user, ...user.toJSON() }
+    : { ...session.user, level: Number(sessionUserRecord.level ?? 1) }
 
   return {
     ...session,
-    user: user ? { ...session.user, ...user.toJSON() } : session.user,
+    user: {
+      ...resolvedUser,
+      level: Number(resolvedUser.level ?? 1),
+    },
   }
 }
 
